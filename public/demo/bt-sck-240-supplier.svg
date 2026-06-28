@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 700" width="500" height="700" font-family="'Helvetica Neue', Arial, sans-serif">
+  <!-- Page -->
+  <rect width="500" height="700" fill="#ffffff"/>
+  <rect x="0.5" y="0.5" width="499" height="699" fill="none" stroke="#e5e7eb"/>
+
+  <!-- Header band (DIFF #9: slightly more saturated brand blue) -->
+  <rect x="0" y="0" width="500" height="72" fill="#2E6FB0"/>
+
+  <!-- Logo mark (DIFF #8: shifted right, x=24 -> x=36) -->
+  <g transform="translate(36,18)">
+    <rect width="40" height="36" rx="8" fill="#ffffff" opacity="0.14"/>
+    <path d="M20 6 C26 14, 31 18, 31 25 a11 11 0 0 1 -22 0 C9 18, 14 14, 20 6 Z" fill="#ffffff"/>
+    <circle cx="20" cy="25" r="4.5" fill="#2E6FB0"/>
+  </g>
+
+  <!-- Brand name -->
+  <text x="88" y="34" fill="#ffffff" font-size="20" font-weight="700" letter-spacing="0.4">BioTouch</text>
+  <text x="89" y="52" fill="#cfe0f0" font-size="9.5" letter-spacing="2.4">DIAGNOSTICS</text>
+
+  <!-- SKU (DIFF #10: heavier font weight 600) and Revision (DIFF #1: REV-03) -->
+  <text x="486" y="31" text-anchor="end" fill="#ffffff" font-size="13" font-weight="600">SKU: BT-SCK-240</text>
+  <text x="486" y="55" text-anchor="end" fill="#ffffff" font-size="13" font-weight="600">REV-03</text>
+
+  <!-- Product title (DIFF #6: "Collecton" misspelling) -->
+  <text x="32" y="118" fill="#1f2937" font-size="22" font-weight="700">Sample Collecton Kit</text>
+  <text x="32" y="142" fill="#6b7280" font-size="11">In&#8209;vitro diagnostic &#183; specimen collection device</text>
+
+  <!-- Divider -->
+  <line x1="32" y1="160" x2="468" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Packaging symbols (illustrative) -->
+  <text x="32" y="180" fill="#9ca3af" font-size="9" letter-spacing="1.2">PACKAGING SYMBOLS</text>
+
+  <!-- Sterile (DIFF #7: symbol removed - cell left empty) -->
+  <g transform="translate(40,190)">
+    <rect width="80" height="60" rx="6" fill="#ffffff" stroke="#eef2f6"/>
+  </g>
+
+  <!-- Single use -->
+  <g transform="translate(128,190)">
+    <rect width="80" height="60" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+    <circle cx="40" cy="24" r="13" fill="none" stroke="#2E6FB0" stroke-width="2"/>
+    <text x="40" y="29" text-anchor="middle" fill="#2E6FB0" font-size="13" font-weight="700">1&#215;</text>
+    <text x="40" y="52" text-anchor="middle" fill="#334155" font-size="9" font-weight="600" letter-spacing="0.3">SINGLE USE*</text>
+  </g>
+
+  <!-- Conformity placeholder (fictional, non-regulatory) -->
+  <g transform="translate(216,190)">
+    <rect width="80" height="60" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+    <rect x="27" y="11" width="26" height="26" rx="5" fill="none" stroke="#2E6FB0" stroke-width="2"/>
+    <text x="40" y="29" text-anchor="middle" fill="#2E6FB0" font-size="10" font-weight="700">QM</text>
+    <text x="40" y="52" text-anchor="middle" fill="#334155" font-size="9" font-weight="600" letter-spacing="0.3">QUALMARK*</text>
+  </g>
+
+  <text x="40" y="266" fill="#9ca3af" font-size="8">*Illustrative symbols only &#8212; not actual regulatory marks.</text>
+
+  <!-- Product information -->
+  <text x="32" y="298" fill="#9ca3af" font-size="9" letter-spacing="1.2">PRODUCT INFORMATION</text>
+
+  <!-- DIFF #4: Store at 2-6C -->
+  <text x="32" y="330" fill="#6b7280" font-size="11">Storage</text>
+  <text x="120" y="330" fill="#1f2937" font-size="13" font-weight="500">Store at 2&#8211;6&#176;C</text>
+
+  <!-- DIFF #5: "For professional use" (missing "only") -->
+  <text x="32" y="364" fill="#6b7280" font-size="11">Warning</text>
+  <text x="120" y="364" fill="#1f2937" font-size="13" font-weight="500">For professional use</text>
+
+  <!-- DIFF #3: LOT row removed (gap left at y~398 where it should be) -->
+
+  <text x="32" y="432" fill="#6b7280" font-size="11">Use by</text>
+  <text x="120" y="432" fill="#1f2937" font-size="13" font-weight="500">EXP: ____________</text>
+
+  <line x1="32" y1="452" x2="468" y2="452" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Barcode (DIFF #2: 8421-9040-22) -->
+  <text x="32" y="470" fill="#9ca3af" font-size="9" letter-spacing="1.2">REFERENCE CODE</text>
+  <g fill="#111827">
+    <rect x="44" y="478" width="2" height="60"/><rect x="48" y="478" width="1" height="60"/><rect x="51" y="478" width="3" height="60"/><rect x="56" y="478" width="1" height="60"/><rect x="59" y="478" width="2" height="60"/><rect x="64" y="478" width="2" height="60"/><rect x="69" y="478" width="1" height="60"/><rect x="72" y="478" width="3" height="60"/><rect x="77" y="478" width="1" height="60"/><rect x="80" y="478" width="2" height="60"/><rect x="85" y="478" width="1" height="60"/><rect x="88" y="478" width="2" height="60"/><rect x="93" y="478" width="3" height="60"/><rect x="98" y="478" width="1" height="60"/><rect x="101" y="478" width="2" height="60"/><rect x="106" y="478" width="2" height="60"/><rect x="111" y="478" width="1" height="60"/><rect x="114" y="478" width="3" height="60"/><rect x="120" y="478" width="1" height="60"/><rect x="123" y="478" width="2" height="60"/><rect x="128" y="478" width="1" height="60"/><rect x="131" y="478" width="2" height="60"/><rect x="136" y="478" width="3" height="60"/><rect x="142" y="478" width="1" height="60"/><rect x="145" y="478" width="2" height="60"/><rect x="150" y="478" width="2" height="60"/><rect x="155" y="478" width="1" height="60"/><rect x="158" y="478" width="3" height="60"/><rect x="164" y="478" width="1" height="60"/><rect x="167" y="478" width="2" height="60"/><rect x="172" y="478" width="2" height="60"/><rect x="177" y="478" width="1" height="60"/><rect x="180" y="478" width="3" height="60"/><rect x="186" y="478" width="1" height="60"/><rect x="189" y="478" width="2" height="60"/><rect x="194" y="478" width="2" height="60"/><rect x="199" y="478" width="1" height="60"/><rect x="202" y="478" width="3" height="60"/><rect x="208" y="478" width="2" height="60"/><rect x="213" y="478" width="1" height="60"/><rect x="217" y="478" width="2" height="60"/><rect x="222" y="478" width="3" height="60"/><rect x="228" y="478" width="1" height="60"/><rect x="231" y="478" width="2" height="60"/><rect x="236" y="478" width="2" height="60"/><rect x="241" y="478" width="1" height="60"/><rect x="244" y="478" width="3" height="60"/>
+  </g>
+  <text x="44" y="556" fill="#111827" font-size="14" font-weight="600" letter-spacing="3">8421-9040-22</text>
+
+  <!-- Fictional disclaimer footer -->
+  <text x="250" y="688" text-anchor="middle" fill="#9ca3af" font-size="8">Fictional sample created for ProofCheck AI demonstration only &#8212; not a real product, brand, or regulatory label.</text>
+</svg>
