@@ -67,7 +67,7 @@ export function FindingDetailPanel({
 }: FindingDetailPanelProps) {
   if (!finding) {
     return (
-      <div className="flex h-full w-72 flex-col items-center justify-center border-l border-border bg-muted/20 px-4 text-center">
+      <div className="flex h-full w-[min(100%,440px)] min-w-[320px] shrink-0 basis-[440px] flex-col items-center justify-center border-l border-border bg-muted/20 px-4 text-center shadow-[-4px_0_12px_rgba(0,0,0,0.04)]">
         <p className="text-sm font-medium text-muted-foreground">
           Select a finding
         </p>
@@ -83,7 +83,7 @@ export function FindingDetailPanel({
   const isBarcode = finding.category === FindingCategory.Barcode;
 
   return (
-    <div className="flex h-full w-[380px] min-w-[380px] shrink-0 flex-col border-l border-border bg-card">
+    <div className="flex h-full w-[min(100%,440px)] min-w-[320px] shrink-0 basis-[440px] flex-col border-l border-border bg-card shadow-[-4px_0_12px_rgba(0,0,0,0.04)]">
       <div className="border-b border-border px-3 py-2.5">
         <div className="flex items-start gap-2">
           <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", config.color)} />
@@ -184,31 +184,36 @@ export function FindingDetailPanel({
         )}
       </div>
 
-      <div className="space-y-1.5 border-t border-border p-2.5">
+      <div className="space-y-2 border-t border-border p-3">
         <Button
           variant={reviewerAction === "accepted" ? "default" : "outline"}
           size="sm"
-          className="w-full justify-start"
+          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
           onClick={() =>
             onAction(reviewerAction === "accepted" ? null : "accepted")
           }
         >
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           Confirm Finding
         </Button>
         <Button
           variant={reviewerAction === "dismissed" ? "default" : "outline"}
           size="sm"
-          className="w-full justify-start"
+          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
           onClick={() =>
             onAction(reviewerAction === "dismissed" ? null : "dismissed")
           }
         >
-          <XCircle className="h-3.5 w-3.5" />
+          <XCircle className="h-3.5 w-3.5 shrink-0" />
           Dismiss False Positive
         </Button>
-        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={onAddNote}>
-          <MessageSquare className="h-3.5 w-3.5" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
+          onClick={onAddNote}
+        >
+          <MessageSquare className="h-3.5 w-3.5 shrink-0" />
           Add Note
         </Button>
       </div>

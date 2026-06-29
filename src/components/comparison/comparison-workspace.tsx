@@ -195,8 +195,8 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
         selectedFindingId={selectedFindingId}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 gap-3 p-3">
+      <div className="flex min-w-0 flex-1 overflow-hidden">
+        <div className="flex min-w-0 flex-1 gap-2 p-2">
           <DocumentPanel
             title="Approved Master"
             label="master"
@@ -229,6 +229,15 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
           />
         </div>
 
+        <FindingsSidebar
+          findings={findings}
+          selectedFindingId={selectedFindingId}
+          onSelectFinding={setSelectedFindingId}
+          reviewerActions={reviewerActions}
+          onAction={handleAction}
+          onAddNote={handleAddNote}
+        />
+
         <FindingDetailPanel
           finding={selectedFinding}
           reviewerAction={selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null}
@@ -238,15 +247,6 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
           onAddNote={() => {
             if (selectedFindingId) handleAddNote(selectedFindingId);
           }}
-        />
-
-        <FindingsSidebar
-          findings={findings}
-          selectedFindingId={selectedFindingId}
-          onSelectFinding={setSelectedFindingId}
-          reviewerActions={reviewerActions}
-          onAction={handleAction}
-          onAddNote={handleAddNote}
         />
       </div>
 

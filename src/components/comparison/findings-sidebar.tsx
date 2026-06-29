@@ -86,7 +86,7 @@ export function FindingsSidebar({
   };
 
   return (
-    <div className="flex h-full w-64 min-w-[256px] shrink-0 flex-col border-l border-border bg-card">
+    <div className="flex h-full w-60 min-w-[240px] shrink-0 flex-col border-l border-border bg-card">
       {/* Header */}
       <div className="border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">

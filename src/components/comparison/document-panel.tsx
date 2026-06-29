@@ -59,7 +59,7 @@ export function DocumentPanel({
   const isMaster = label === "master";
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
       <div className="flex h-9 items-center justify-between border-b border-border px-3">
         <span className="text-xs font-medium text-foreground">{title}</span>
         <span
