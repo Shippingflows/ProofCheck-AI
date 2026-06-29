@@ -83,8 +83,8 @@ export function FindingDetailPanel({
   const isBarcode = finding.category === FindingCategory.Barcode;
 
   return (
-    <div className="flex h-full w-72 flex-col border-l border-border bg-card">
-      <div className="border-b border-border px-4 py-3">
+    <div className="flex h-full w-[380px] min-w-[380px] shrink-0 flex-col border-l border-border bg-card">
+      <div className="border-b border-border px-3 py-2.5">
         <div className="flex items-start gap-2">
           <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", config.color)} />
           <div className="min-w-0 flex-1">
@@ -103,14 +103,14 @@ export function FindingDetailPanel({
         </div>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div className="flex-1 space-y-2.5 overflow-y-auto p-3">
         <Card className="border border-border bg-muted/20 shadow-none">
-          <CardHeader className="pb-1 pt-3 px-3">
-            <CardTitle className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <CardHeader className="pb-1 pt-2.5 px-2.5">
+            <CardTitle className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               Extracted evidence
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 px-3 pb-3">
+          <CardContent className="space-y-2 px-2.5 pb-2.5">
             <EvidenceRow
               label="Approved master value"
               value={finding.sourceValue ?? "—"}
@@ -184,7 +184,7 @@ export function FindingDetailPanel({
         )}
       </div>
 
-      <div className="space-y-2 border-t border-border p-3">
+      <div className="space-y-1.5 border-t border-border p-2.5">
         <Button
           variant={reviewerAction === "accepted" ? "default" : "outline"}
           size="sm"
@@ -239,7 +239,7 @@ function EvidenceRow({
       <p className="text-[10px] font-medium text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "mt-0.5 font-medium leading-snug",
+          "mt-0.5 break-words font-medium leading-snug",
           tone === "master" && "font-mono text-emerald-700",
           tone === "supplier" && "font-mono text-red-600",
           tone === "neutral" && "text-foreground"

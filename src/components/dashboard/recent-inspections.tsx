@@ -91,68 +91,78 @@ export function RecentInspections() {
           </div>
         )}
         {!isLoading && !isError && inspections && inspections.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="pl-6">Title</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Revision</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Findings</TableHead>
-              <TableHead>Due</TableHead>
-              <TableHead>Reviewer</TableHead>
-              <TableHead className="pr-6">Correction</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {inspections.map((inspection) => (
-              <TableRow
-                key={inspection.id}
-                className="cursor-pointer"
-                onClick={() => router.push(`/comparison/${inspection.id}`)}
-              >
-                <TableCell className="max-w-[200px] pl-6 font-medium">
-                  <span className="truncate">{inspection.title}</span>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {inspection.supplierName || "—"}
-                </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {inspection.sku}
-                </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {inspection.revision}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "text-xs font-medium",
-                      statusVariant(inspection.status)
-                    )}
-                  >
-                    {statusLabel(inspection.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-xs text-foreground">
-                  {formatSeverityCounts(inspection.findingsCount)}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(inspection.dueDate)}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {inspection.reviewerName}
-                </TableCell>
-                <TableCell className="pr-6 text-xs text-muted-foreground">
-                  {inspection.correctionStatus === CorrectionStatus.NotStarted
-                    ? "—"
-                    : correctionStatusLabel(inspection.correctionStatus)}
-                </TableCell>
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[24%] pl-6">Title</TableHead>
+                <TableHead className="w-[14%]">Supplier</TableHead>
+                <TableHead className="w-[9%]">SKU</TableHead>
+                <TableHead className="w-[7%]">Revision</TableHead>
+                <TableHead className="w-[11%]">Status</TableHead>
+                <TableHead className="w-[14%]">Findings</TableHead>
+                <TableHead className="w-[8%]">Due</TableHead>
+                <TableHead className="w-[8%]">Reviewer</TableHead>
+                <TableHead className="w-[5%] pr-6">Correction</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {inspections.map((inspection) => (
+                <TableRow
+                  key={inspection.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/comparison/${inspection.id}`)}
+                >
+                  <TableCell className="max-w-0 pl-6 font-medium">
+                    <span
+                      className="block truncate"
+                      title={inspection.title}
+                    >
+                      {inspection.title}
+                    </span>
+                  </TableCell>
+                  <TableCell className="max-w-0 text-sm text-muted-foreground">
+                    <span
+                      className="block truncate"
+                      title={inspection.supplierName || "—"}
+                    >
+                      {inspection.supplierName || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {inspection.sku}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {inspection.revision}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs font-medium",
+                        statusVariant(inspection.status)
+                      )}
+                    >
+                      {statusLabel(inspection.status)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-normal text-xs leading-snug text-foreground">
+                    {formatSeverityCounts(inspection.findingsCount)}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(inspection.dueDate)}
+                  </TableCell>
+                  <TableCell className="max-w-0 text-sm text-muted-foreground">
+                    <span className="block truncate">{inspection.reviewerName}</span>
+                  </TableCell>
+                  <TableCell className="pr-6 text-xs text-muted-foreground">
+                    {inspection.correctionStatus === CorrectionStatus.NotStarted
+                      ? "—"
+                      : correctionStatusLabel(inspection.correctionStatus)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>

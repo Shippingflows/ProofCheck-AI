@@ -62,7 +62,7 @@ const baseInspection = {
   reviewerEmail: "sarah.chen@demo-company.com",
   reviewerRole: "Quality Reviewer",
   checklistIds: ["chk_text", "chk_barcode", "chk_symbols", "chk_metadata", "chk_missing"],
-  recommendationNote: "Pending human QA confirmation",
+  recommendationNote: "Final disposition requires confirmation by an authorized QA reviewer.",
   masterFileHash: "demo-b94d27b9c4e8f1a2037d6e5b4a2910c8f7e6d5c4b3a291807f6e5d4c3b2a1908f7",
   supplierFileHash: "demo-a81f5f3c7e6d5c4b3a291807f6e5d4c3b2a1908f7e6d5c4b3a291807f6e5",
   masterUploadedAt: "2025-01-15T09:32:00Z",

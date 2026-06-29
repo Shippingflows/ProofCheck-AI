@@ -22,7 +22,7 @@ describe("Phase 10 demo maturity", () => {
 
   it("uses canonical suggested QA action wording", () => {
     expect(RECOMMENDATION_REJECT).toBe(
-      "Suggested QA Action: Supplier Correction Required"
+      "Suggested QA Action: Request Supplier Correction"
     );
     const formatted = formatRecommendation(RECOMMENDATION_REJECT);
     expect(formatted.action).toBe(RECOMMENDATION_REJECT);

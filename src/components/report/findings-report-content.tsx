@@ -30,7 +30,8 @@ import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-p
 import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
 import { ExportQcReportPreview } from "@/components/shared/export-qc-report-preview";
 import { ReportMetadataHeader } from "@/components/report/report-metadata-header";
-import { formatRecommendation } from "@/lib/recommendations";
+import { DetailedFindingsEvidence } from "@/components/report/detailed-findings-evidence";
+import { formatRecommendation, RECOMMENDATION_SUMMARY_SENTENCE } from "@/lib/recommendations";
 import {
   isPotentialMismatch,
   whyFlagged,
@@ -107,9 +108,7 @@ function generateSummary(inspection: Inspection, findings: Finding[]): string {
   }
 
   if (inspection.recommendation) {
-    parts.push(
-      `Based on the structured findings, the recommended action is: ${inspection.recommendation}.`
-    );
+    parts.push(RECOMMENDATION_SUMMARY_SENTENCE);
   }
 
   return parts.join(" ");
@@ -261,6 +260,8 @@ export function FindingsReportContent({
           </p>
         </CardContent>
       </Card>
+
+      <DetailedFindingsEvidence findings={findings} />
 
       {/* Findings grouped by category */}
       {Object.entries(groupedByCategory).map(([category, categoryFindings]) => (

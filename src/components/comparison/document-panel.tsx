@@ -8,6 +8,7 @@ export interface FindingMarker {
   id: string;
   region: EvidenceRegion;
   severity: FindingSeverity;
+  number: number;
 }
 
 interface DocumentPanelProps {
@@ -124,23 +125,40 @@ export function DocumentPanel({
           )}
 
           {overlayVisible &&
-            !highlightRegion &&
-            markers.map((marker) => (
-              <div
-                key={marker.id}
-                className={cn(
-                  "pointer-events-none absolute rounded-sm border",
-                  markerColor[marker.severity],
-                  selectedMarkerId === marker.id && "ring-1 ring-offset-0"
-                )}
-                style={{
-                  left: `${marker.region.x * scale}px`,
-                  top: `${marker.region.y * scale}px`,
-                  width: `${marker.region.width * scale}px`,
-                  height: `${marker.region.height * scale}px`,
-                }}
-              />
-            ))}
+            markers.map((marker) => {
+              const isSelected = marker.id === selectedMarkerId;
+              if (isSelected && highlightRegion) return null;
+
+              return (
+                <div
+                  key={marker.id}
+                  className={cn(
+                    "pointer-events-none absolute rounded-sm border",
+                    markerColor[marker.severity],
+                    highlightRegion ? "opacity-70" : "opacity-90"
+                  )}
+                  style={{
+                    left: `${marker.region.x * scale}px`,
+                    top: `${marker.region.y * scale}px`,
+                    width: `${marker.region.width * scale}px`,
+                    height: `${marker.region.height * scale}px`,
+                  }}
+                >
+                  <span
+                    className={cn(
+                      "absolute -left-1 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[9px] font-bold text-white shadow-sm",
+                      marker.severity === FindingSeverity.Critical
+                        ? "bg-red-600"
+                        : marker.severity === FindingSeverity.Major
+                          ? "bg-amber-600"
+                          : "bg-slate-600"
+                    )}
+                  >
+                    {marker.number}
+                  </span>
+                </div>
+              );
+            })}
 
           {highlightRegion && overlayVisible && (
             <>
@@ -162,7 +180,7 @@ export function DocumentPanel({
               )}
               <div
                 className={cn(
-                  "pointer-events-none absolute rounded-sm border-[3px] shadow-[0_0_0_4px_rgba(0,0,0,0.06)] transition-all duration-200",
+                  "pointer-events-none absolute z-[5] rounded-sm border-[3px] shadow-[0_0_0_4px_rgba(0,0,0,0.06)] transition-all duration-200",
                   isMaster
                     ? "border-emerald-500 bg-emerald-500/15"
                     : "border-red-500 bg-red-500/15"

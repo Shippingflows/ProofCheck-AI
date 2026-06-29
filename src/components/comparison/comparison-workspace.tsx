@@ -7,6 +7,7 @@ import { ViewerControls } from "./viewer-controls";
 import { FindingsSidebar, type ReviewAction } from "./findings-sidebar";
 import { FindingDetailPanel } from "./finding-detail-panel";
 import { InspectionSummaryBar } from "./inspection-summary-bar";
+import { OtherFindingsBanner } from "./other-findings-banner";
 import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { EvidenceRegion } from "@/domain/models";
@@ -119,12 +120,14 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
     selectedFinding?.evidenceRegion ?? null;
 
   const demoDocuments = getDemoDocuments(inspectionId);
+  const findingNumberMap = new Map(findings.map((f, i) => [f.id, i + 1]));
   const markers: FindingMarker[] = findings
     .filter((f) => f.evidenceRegion !== null)
     .map((f) => ({
       id: f.id,
       region: f.evidenceRegion as EvidenceRegion,
       severity: f.severity,
+      number: findingNumberMap.get(f.id) ?? 0,
     }));
 
   if (loadingInspection || loadingFindings) {
@@ -186,6 +189,11 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
       </div>
 
       <InspectionSummaryBar inspection={inspection} />
+
+      <OtherFindingsBanner
+        findings={findings}
+        selectedFindingId={selectedFindingId}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="flex flex-1 gap-3 p-3">
