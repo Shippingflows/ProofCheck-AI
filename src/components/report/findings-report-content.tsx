@@ -29,6 +29,7 @@ import { InspectionProfileCard } from "@/components/shared/inspection-profile-ca
 import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
 import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
 import { ExportQcReportPreview } from "@/components/shared/export-qc-report-preview";
+import { ReportMetadataHeader } from "@/components/report/report-metadata-header";
 import { formatRecommendation } from "@/lib/recommendations";
 import {
   isPotentialMismatch,
@@ -189,6 +190,8 @@ export function FindingsReportContent({
 
   return (
     <div className="space-y-6">
+      <ReportMetadataHeader inspection={inspection} />
+
       <div className="grid gap-4 lg:grid-cols-2">
         <InspectionProfileCard profileRef={inspection.profileRef} />
         <WhatProofCheckReviews />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Copy,
   Send,
@@ -10,6 +11,8 @@ import {
   Info,
   Loader2,
   Calendar,
+  Save,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +24,7 @@ import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { addAuditEvent, updateInspection } from "@/data/mock-repository";
 import { CorrectionStatusTracker } from "@/components/shared/correction-status-tracker";
 import { ErrorState, EmptyState } from "@/components/shared/state-views";
+import { DEMO_SUPPLIER_EMAIL } from "@/data/seed";
 
 interface CorrectionRequestContentProps {
   inspection: Inspection;
@@ -50,7 +54,7 @@ const severityConfig = {
 };
 
 function generateEmailSubject(inspection: Inspection): string {
-  return `Correction Required — ${inspection.title} Proof ${inspection.sku} ${inspection.revision}`;
+  return `Correction Required: BioTouch Sample Collection Kit Proof ${inspection.sku} ${inspection.revision}`;
 }
 
 function generateEmailBody(
@@ -133,11 +137,13 @@ export function CorrectionRequestContent({
   findings,
   onMarkSent,
 }: CorrectionRequestContentProps) {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(findings.map((f) => f.id))
   );
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
   const [dueDate, setDueDate] = useState("");
 
   const selectedFindings = useMemo(
@@ -164,12 +170,17 @@ export function CorrectionRequestContent({
     setEmailBody(generateEmailBody(inspection, selectedFindings));
   };
 
-  const fullEmailText = `To: Pacific Print Solutions\nSubject: ${subject}\n\n${emailBody}`;
+  const fullEmailText = `To: ${DEMO_SUPPLIER_EMAIL}\nSubject: ${subject}\n\n${emailBody}`;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(fullEmailText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveDraft = () => {
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000);
   };
 
   const handleMarkSent = () => {
@@ -187,7 +198,7 @@ export function CorrectionRequestContent({
           <div>
             <p className="text-xs text-muted-foreground">Supplier</p>
             <p className="text-sm font-medium text-foreground">
-              Pacific Print Solutions
+              {inspection.supplierName}
             </p>
           </div>
           <div>
@@ -273,17 +284,18 @@ export function CorrectionRequestContent({
           <Card className="border border-border shadow-none">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Correction Request Draft</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Review the generated supplier correction request before sending.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* To */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">To</label>
                 <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
-                  Pacific Print Solutions
+                  {DEMO_SUPPLIER_EMAIL}
                 </div>
               </div>
 
-              {/* Subject */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Subject</label>
                 <input
@@ -294,15 +306,29 @@ export function CorrectionRequestContent({
                 />
               </div>
 
-              {/* Body */}
+              {/* Email preview card */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Body</label>
-                <textarea
-                  value={emailBody}
-                  onChange={(e) => setEmailBody(e.target.value)}
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-xs leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  rows={20}
-                />
+                <label className="text-xs font-medium text-muted-foreground">
+                  Email preview
+                </label>
+                <div className="rounded-lg border border-border bg-white shadow-sm">
+                  <div className="border-b border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+                    <p>
+                      <span className="font-medium text-foreground">To:</span>{" "}
+                      {DEMO_SUPPLIER_EMAIL}
+                    </p>
+                    <p className="mt-0.5">
+                      <span className="font-medium text-foreground">Subject:</span>{" "}
+                      {subject}
+                    </p>
+                  </div>
+                  <textarea
+                    value={emailBody}
+                    onChange={(e) => setEmailBody(e.target.value)}
+                    className="min-h-[420px] w-full resize-y border-0 bg-transparent px-4 py-3 font-sans text-sm leading-relaxed text-foreground focus-visible:outline-none"
+                    rows={24}
+                  />
+                </div>
               </div>
 
               {/* Included findings summary */}
@@ -344,11 +370,11 @@ export function CorrectionRequestContent({
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                 <p className="text-xs text-muted-foreground">
-                  Demo only — no email is sent automatically.
+                  Pilot workspace — email is not sent automatically.
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -363,6 +389,19 @@ export function CorrectionRequestContent({
                     {copied ? "Copied" : "Copy Email"}
                   </Button>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveDraft}
+                    disabled={sent}
+                  >
+                    {draftSaved ? (
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+                    ) : (
+                      <Save className="h-3.5 w-3.5" />
+                    )}
+                    {draftSaved ? "Draft Saved" : "Save Draft"}
+                  </Button>
+                  <Button
                     size="sm"
                     onClick={handleMarkSent}
                     disabled={sent}
@@ -374,6 +413,14 @@ export function CorrectionRequestContent({
                       <Send className="h-3.5 w-3.5" />
                     )}
                     {sent ? "Marked as Sent" : "Mark as Sent"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/report")}
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Preview Report
                   </Button>
                 </div>
               </div>

@@ -16,7 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Finding } from "@/domain/models";
 import { FindingSeverity, FindingCategory } from "@/domain/enums";
 import { cn } from "@/lib/utils";
-import { confidenceLabel, whyFlagged } from "@/lib/findings";
+import { confidencePercent } from "@/lib/findings";
+import { getDifferenceNote } from "@/lib/finding-difference";
 import type { ReviewAction } from "@/components/comparison/findings-sidebar";
 
 const severityConfig = {
@@ -102,32 +103,49 @@ export function FindingDetailPanel({
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        <Card className="border border-border bg-muted/20 shadow-none">
+          <CardHeader className="pb-1 pt-3 px-3">
+            <CardTitle className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Extracted evidence
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 px-3 pb-3">
+            <EvidenceRow
+              label="Approved master value"
+              value={finding.sourceValue ?? "—"}
+              tone="master"
+            />
+            <EvidenceRow
+              label="Supplier proof value"
+              value={finding.supplierValue ?? "Not detected"}
+              tone="supplier"
+            />
+            <EvidenceRow
+              label="Difference"
+              value={getDifferenceNote(finding)}
+              tone="neutral"
+            />
+            <EvidenceRow
+              label="Detection method"
+              value={finding.detectionMethod}
+              tone="neutral"
+            />
+            <EvidenceRow
+              label="Confidence"
+              value={`${confidencePercent(finding)}%`}
+              tone="neutral"
+            />
+            <EvidenceRow
+              label="Recommended action"
+              value={finding.recommendedAction}
+              tone="neutral"
+            />
+          </CardContent>
+        </Card>
+
         <DetailRow label="Location" value={finding.location} />
         <DetailRow label="Page" value={String(finding.pageNumber)} />
-        <DetailRow label="Detection" value={finding.detectionMethod} />
-        <DetailRow label="Status" value={confidenceLabel(finding)} />
-        <DetailRow label="Recommended action" value={finding.recommendedAction} />
-
-        <div>
-          <p className="text-[11px] font-medium text-muted-foreground">Why flagged</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-foreground">
-            {whyFlagged(finding)}
-          </p>
-        </div>
-
-        {(finding.sourceValue || finding.supplierValue) && (
-          <Card className="border border-border shadow-none">
-            <CardContent className="space-y-2 p-3">
-              <ValueRow label="Approved" value={finding.sourceValue ?? "—"} tone="master" />
-              <ValueRow
-                label="Supplier"
-                value={finding.supplierValue ?? "Not detected"}
-                tone="supplier"
-              />
-            </CardContent>
-          </Card>
-        )}
 
         {isBarcode && (
           <Card className="border border-amber-200 bg-amber-50/50 shadow-none">
@@ -207,26 +225,28 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ValueRow({
+function EvidenceRow({
   label,
   value,
   tone,
 }: {
   label: string;
   value: string;
-  tone: "master" | "supplier";
+  tone: "master" | "supplier" | "neutral";
 }) {
   return (
-    <div className="flex gap-2 text-xs">
-      <span
+    <div className="text-xs">
+      <p className="text-[10px] font-medium text-muted-foreground">{label}</p>
+      <p
         className={cn(
-          "w-16 shrink-0 font-medium",
-          tone === "master" ? "text-emerald-700" : "text-red-600"
+          "mt-0.5 font-medium leading-snug",
+          tone === "master" && "font-mono text-emerald-700",
+          tone === "supplier" && "font-mono text-red-600",
+          tone === "neutral" && "text-foreground"
         )}
       >
-        {label}
-      </span>
-      <span className="font-mono text-foreground">{value}</span>
+        {value}
+      </p>
     </div>
   );
 }

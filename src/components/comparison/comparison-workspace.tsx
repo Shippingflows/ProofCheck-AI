@@ -1,21 +1,34 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { ShieldAlert } from "lucide-react";
 import { DocumentPanel, type FindingMarker } from "./document-panel";
 import { ViewerControls } from "./viewer-controls";
 import { FindingsSidebar, type ReviewAction } from "./findings-sidebar";
 import { FindingDetailPanel } from "./finding-detail-panel";
-import { InspectionProfileCard } from "@/components/shared/inspection-profile-card";
+import { InspectionSummaryBar } from "./inspection-summary-bar";
 import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
-import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { EvidenceRegion } from "@/domain/models";
+import { FindingSeverity } from "@/domain/enums";
 import {
   ProcessingState,
   ErrorState,
 } from "@/components/shared/state-views";
 import { getDemoDocuments } from "@/lib/demo";
+import { DEMO_DEFAULT_FINDING_ID } from "@/data/seed";
+
+function getHighlightLabel(finding: { id: string; severity: FindingSeverity; title: string }): string {
+  const sev =
+    finding.severity === FindingSeverity.Critical
+      ? "Critical"
+      : finding.severity === FindingSeverity.Major
+        ? "Major"
+        : "Minor";
+  const shortTitle =
+    finding.id === DEMO_DEFAULT_FINDING_ID ? "Revision mismatch" : finding.title;
+  return `${sev} · ${shortTitle}`;
+}
 
 interface ComparisonWorkspaceProps {
   inspectionId: string;
@@ -37,7 +50,9 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
   const [syncScroll, setSyncScroll] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
+  const [selectedFindingId, setSelectedFindingId] = useState<string | null>(
+    DEMO_DEFAULT_FINDING_ID
+  );
   const [reviewerActions, setReviewerActions] = useState<
     Record<string, ReviewAction>
   >({});
@@ -89,6 +104,15 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
     setNoteDialogFindingId(findingId);
     setNoteText("");
   }, []);
+
+  // Ensure demo opens with the revision mismatch preselected once findings load
+  useEffect(() => {
+    if (findings.length === 0) return;
+    const defaultFinding = findings.find((f) => f.id === DEMO_DEFAULT_FINDING_ID);
+    if (defaultFinding && !findings.some((f) => f.id === selectedFindingId)) {
+      setSelectedFindingId(DEMO_DEFAULT_FINDING_ID);
+    }
+  }, [findings, selectedFindingId]);
 
   const selectedFinding = findings.find((f) => f.id === selectedFindingId) ?? null;
   const highlightRegion: EvidenceRegion | null =
@@ -161,10 +185,7 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
         />
       </div>
 
-      <div className="grid shrink-0 grid-cols-[1fr_280px] gap-3 border-b border-border bg-muted/20 p-3">
-        <InspectionProfileCard profileRef={inspection.profileRef} compact />
-        <WhatProofCheckReviews />
-      </div>
+      <InspectionSummaryBar inspection={inspection} />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="flex flex-1 gap-3 p-3">
@@ -174,6 +195,9 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
             zoom={zoom}
             overlayVisible={overlayVisible}
             highlightRegion={highlightRegion}
+            highlightLabel={
+              selectedFinding ? getHighlightLabel(selectedFinding) : null
+            }
             documentSrc={demoDocuments?.master ?? null}
             markers={markers}
             selectedMarkerId={selectedFindingId}
@@ -186,6 +210,9 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
             zoom={zoom}
             overlayVisible={overlayVisible}
             highlightRegion={highlightRegion}
+            highlightLabel={
+              selectedFinding ? getHighlightLabel(selectedFinding) : null
+            }
             documentSrc={demoDocuments?.supplier ?? null}
             markers={markers}
             selectedMarkerId={selectedFindingId}

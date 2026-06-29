@@ -14,8 +14,11 @@ import { DEFAULT_CHECKLIST_COMPLETED } from "@/lib/reviewer-checklist";
 import { EVIDENCE_SNAPSHOTS } from "@/lib/evidence-snapshots";
 
 export const DEMO_INSPECTION_ID = "insp_bioTouch_001";
+export const DEMO_DEFAULT_FINDING_ID = "find_001";
 export const DEMO_FORM_TITLE =
   "BioTouch Sample Collection Kit — Supplier Proof Review";
+export const DEMO_SUPPLIER_EMAIL =
+  "Pacific Print Solutions <qa@pacificprintsolutions.example>";
 
 function auditEvent(
   partial: Omit<AuditEvent, "eventId" | "actorRole" | "source" | "timestampLocal"> & {
@@ -86,7 +89,7 @@ export const seedInspections: Inspection[] = [
     profileRef: "profile_medical_device_01",
     findingsCount: { critical: 4, major: 3, minor: 3 },
     recommendation: RECOMMENDATION_REJECT,
-    correctionStatus: CorrectionStatus.DraftNeeded,
+    correctionStatus: CorrectionStatus.DraftPrepared,
   },
   {
     ...baseInspection,

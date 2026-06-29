@@ -20,9 +20,9 @@ describe("Phase 10 demo maturity", () => {
     );
   });
 
-  it("uses canonical reject recommendation wording", () => {
+  it("uses canonical suggested QA action wording", () => {
     expect(RECOMMENDATION_REJECT).toBe(
-      "Recommended Action: Reject — Supplier Correction Required"
+      "Suggested QA Action: Supplier Correction Required"
     );
     const formatted = formatRecommendation(RECOMMENDATION_REJECT);
     expect(formatted.action).toBe(RECOMMENDATION_REJECT);
@@ -35,12 +35,9 @@ describe("Phase 10 demo maturity", () => {
     );
   });
 
-  it("labels correction status steps", () => {
-    expect(correctionStatusLabel(CorrectionStatus.SentToSupplier)).toBe(
-      "Sent to supplier"
-    );
-    expect(correctionStatusLabel(CorrectionStatus.AwaitingResubmission)).toBe(
-      "Awaiting resubmission"
+  it("labels draft prepared status for correction credibility", () => {
+    expect(correctionStatusLabel(CorrectionStatus.DraftPrepared)).toBe(
+      "Draft prepared — not sent"
     );
   });
 

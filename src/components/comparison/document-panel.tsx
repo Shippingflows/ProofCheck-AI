@@ -16,6 +16,7 @@ interface DocumentPanelProps {
   zoom: number;
   overlayVisible: boolean;
   highlightRegion: EvidenceRegion | null;
+  highlightLabel?: string | null;
   documentSrc?: string | null;
   markers?: FindingMarker[];
   selectedMarkerId?: string | null;
@@ -38,6 +39,7 @@ export function DocumentPanel({
   zoom,
   overlayVisible,
   highlightRegion,
+  highlightLabel,
   documentSrc,
   markers = [],
   selectedMarkerId,
@@ -53,6 +55,8 @@ export function DocumentPanel({
     }
   };
 
+  const isMaster = label === "master";
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
       <div className="flex h-9 items-center justify-between border-b border-border px-3">
@@ -60,12 +64,12 @@ export function DocumentPanel({
         <span
           className={cn(
             "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-            label === "master"
+            isMaster
               ? "bg-emerald-50 text-emerald-700"
-              : "bg-blue-50 text-blue-700"
+              : "bg-red-50 text-red-700"
           )}
         >
-          {label === "master" ? "Approved" : "Supplier"}
+          {isMaster ? "Approved" : "Supplier"}
         </span>
       </div>
 
@@ -119,7 +123,6 @@ export function DocumentPanel({
             </div>
           )}
 
-          {/* Faint markers for all findings (shown when no finding is selected) */}
           {overlayVisible &&
             !highlightRegion &&
             markers.map((marker) => (
@@ -139,22 +142,39 @@ export function DocumentPanel({
               />
             ))}
 
-          {/* Strong highlight for the selected finding */}
           {highlightRegion && overlayVisible && (
-            <div
-              className={cn(
-                "pointer-events-none absolute rounded-sm border-2 shadow-[0_0_0_4px_rgba(0,0,0,0.04)] transition-all duration-200",
-                label === "supplier"
-                  ? "border-red-500 bg-red-500/10"
-                  : "border-amber-500 bg-amber-500/10"
+            <>
+              {highlightLabel && (
+                <div
+                  className={cn(
+                    "pointer-events-none absolute z-10 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold shadow-sm",
+                    isMaster
+                      ? "bg-emerald-600 text-white"
+                      : "bg-red-600 text-white"
+                  )}
+                  style={{
+                    left: `${highlightRegion.x * scale}px`,
+                    top: `${Math.max(0, highlightRegion.y * scale - 22)}px`,
+                  }}
+                >
+                  {highlightLabel}
+                </div>
               )}
-              style={{
-                left: `${highlightRegion.x * scale}px`,
-                top: `${highlightRegion.y * scale}px`,
-                width: `${highlightRegion.width * scale}px`,
-                height: `${highlightRegion.height * scale}px`,
-              }}
-            />
+              <div
+                className={cn(
+                  "pointer-events-none absolute rounded-sm border-[3px] shadow-[0_0_0_4px_rgba(0,0,0,0.06)] transition-all duration-200",
+                  isMaster
+                    ? "border-emerald-500 bg-emerald-500/15"
+                    : "border-red-500 bg-red-500/15"
+                )}
+                style={{
+                  left: `${highlightRegion.x * scale}px`,
+                  top: `${highlightRegion.y * scale}px`,
+                  width: `${highlightRegion.width * scale}px`,
+                  height: `${highlightRegion.height * scale}px`,
+                }}
+              />
+            </>
           )}
         </div>
       </div>

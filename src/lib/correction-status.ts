@@ -3,7 +3,7 @@ import { CorrectionStatus } from "@/domain/enums";
 export const CORRECTION_STATUS_LABELS: Record<CorrectionStatus, string> = {
   [CorrectionStatus.NotStarted]: "Not started",
   [CorrectionStatus.DraftNeeded]: "Draft needed",
-  [CorrectionStatus.DraftPrepared]: "Draft prepared",
+  [CorrectionStatus.DraftPrepared]: "Draft prepared — not sent",
   [CorrectionStatus.SentToSupplier]: "Sent to supplier",
   [CorrectionStatus.AwaitingResubmission]: "Awaiting resubmission",
   [CorrectionStatus.Resubmitted]: "Resubmitted",
