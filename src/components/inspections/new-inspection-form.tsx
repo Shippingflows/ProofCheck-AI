@@ -22,7 +22,8 @@ import {
 } from "./form-schema";
 import { createInspection, addAuditEvent } from "@/data/mock-repository";
 import { InspectionStatus, ReviewDecision, AuditAction } from "@/domain/enums";
-import { DEMO_INSPECTION_ID } from "@/data/seed";
+import { DEMO_INSPECTION_ID, DEMO_FORM_TITLE, isDemoFormSubmission } from "@/data/seed";
+import { IS_DEMO_MODE } from "@/lib/demo";
 import { cn } from "@/lib/utils";
 import { InfoTooltip } from "@/components/shared/info-tooltip";
 
@@ -42,6 +43,7 @@ interface FormInput {
 export function NewInspectionForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDemoFormFilled, setIsDemoFormFilled] = useState(false);
 
   const {
     register,
@@ -67,6 +69,15 @@ export function NewInspectionForm() {
 
   const onSubmit = async (data: FormInput) => {
     setIsSubmitting(true);
+
+    // Demo form submissions always open the seeded BioTouch inspection with 10 findings
+    if (
+      IS_DEMO_MODE &&
+      (isDemoFormFilled || isDemoFormSubmission(data.title, data.supplierName))
+    ) {
+      router.push(`/comparison/${DEMO_INSPECTION_ID}`);
+      return;
+    }
 
     const inspection = await createInspection({
       title: data.title,
@@ -112,6 +123,7 @@ export function NewInspectionForm() {
   };
 
   const loadDemoInspection = () => {
+    setIsDemoFormFilled(true);
     const demoFile = new File(["demo"], "bt-sck-240-rev04-approved.pdf", {
       type: "application/pdf",
     });
@@ -120,7 +132,7 @@ export function NewInspectionForm() {
     });
 
     reset({
-      title: "BioTouch Sample Collection Kit — Supplier Proof Review",
+      title: DEMO_FORM_TITLE,
       supplierName: "Pacific Print Solutions",
       productName: "BioTouch Sample Collection Kit",
       masterFile: demoFile,
@@ -146,17 +158,17 @@ export function NewInspectionForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Demo shortcut */}
+      {/* Sample workflow shortcut */}
       <Card className="border border-dashed border-primary/30 bg-primary/5 shadow-none">
         <CardContent className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <FlaskConical className="h-5 w-5 text-primary" />
             <div>
               <p className="text-sm font-medium text-foreground">
-                Demo Mode
+                Sample Inspection
               </p>
               <p className="text-xs text-muted-foreground">
-                Load the BioTouch sample inspection to explore the workflow
+                Load the BioTouch sample to walk through the review workflow
               </p>
             </div>
           </div>
@@ -174,7 +186,7 @@ export function NewInspectionForm() {
               size="sm"
               onClick={loadDemoAndRoute}
             >
-              View Demo Results
+              Open Sample Review
             </Button>
           </div>
         </CardContent>

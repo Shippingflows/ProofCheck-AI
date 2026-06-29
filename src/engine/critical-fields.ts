@@ -11,6 +11,7 @@
 
 import { Finding, EvidenceRegion } from "@/domain/models";
 import { FindingSeverity, FindingCategory } from "@/domain/enums";
+import { ENGINE_FINDING_DEFAULTS } from "./finding-defaults";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -323,6 +324,8 @@ export function criticalFieldResultToFinding(
     confidence,
     evidenceRegion: region ?? null,
     reviewerVerified: null,
+    ...ENGINE_FINDING_DEFAULTS,
+    detectionMethod: "Critical field rule check",
   };
 }
 

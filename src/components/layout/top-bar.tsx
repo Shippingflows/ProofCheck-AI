@@ -5,10 +5,13 @@ import { Bell, User } from "lucide-react";
 export function TopBar() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <h1 className="text-sm font-medium text-foreground">
           Supplier Proof Review Workspace
         </h1>
+        <span className="rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
+          Pilot Workspace · Sample Data
+        </span>
       </div>
 
       <div className="flex items-center gap-3">

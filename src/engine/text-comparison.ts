@@ -16,6 +16,7 @@ import {
   classifyPageCountMismatch,
   classifyDimensionMismatch,
 } from "./severity-mapping";
+import { ENGINE_FINDING_DEFAULTS } from "./finding-defaults";
 
 /**
  * Compares extracted text from master and supplier documents.
@@ -172,6 +173,7 @@ export function textDiffsToFindings(
       confidence: classification.confidence,
       evidenceRegion: null,
       reviewerVerified: null,
+      ...ENGINE_FINDING_DEFAULTS,
     };
   });
 }
@@ -207,6 +209,7 @@ export function metadataDiffsToFindings(
       confidence: classification.confidence,
       evidenceRegion: null,
       reviewerVerified: null,
+      ...ENGINE_FINDING_DEFAULTS,
     };
   });
 }
@@ -236,6 +239,7 @@ export function aspectRatioToFinding(
     confidence: classification.confidence,
     evidenceRegion: null,
     reviewerVerified: null,
+    ...ENGINE_FINDING_DEFAULTS,
   };
 }
 

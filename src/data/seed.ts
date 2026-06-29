@@ -5,95 +5,162 @@ import {
   FindingCategory,
   ReviewDecision,
   AuditAction,
+  CorrectionStatus,
+  AuditActorRole,
+  AuditEventSource,
 } from "@/domain/enums";
+import { RECOMMENDATION_REJECT } from "@/lib/recommendations";
+import { DEFAULT_CHECKLIST_COMPLETED } from "@/lib/reviewer-checklist";
+import { EVIDENCE_SNAPSHOTS } from "@/lib/evidence-snapshots";
 
 export const DEMO_INSPECTION_ID = "insp_bioTouch_001";
+export const DEMO_FORM_TITLE =
+  "BioTouch Sample Collection Kit — Supplier Proof Review";
+
+function auditEvent(
+  partial: Omit<AuditEvent, "eventId" | "actorRole" | "source" | "timestampLocal"> & {
+    actorRole?: AuditActorRole;
+    source?: AuditEventSource;
+    timestampLocal?: string;
+  }
+): AuditEvent {
+  const isSystem = partial.actor === "System";
+  return {
+    eventId: partial.id.toUpperCase().replace("AUDIT", "EVT"),
+    actorRole: partial.actorRole ?? (isSystem ? AuditActorRole.System : AuditActorRole.QualityReviewer),
+    source: partial.source ?? (isSystem ? AuditEventSource.System : AuditEventSource.Reviewer),
+    timestampLocal: partial.timestampLocal ?? "Jan 15, 2025, 9:30 AM EST",
+    ...partial,
+  };
+}
+
+function finding(
+  data: Omit<
+    Finding,
+    "detectionMethod" | "recommendedAction" | "masterEvidenceSrc" | "supplierEvidenceSrc"
+  >
+): Finding {
+  const snaps = EVIDENCE_SNAPSHOTS[data.id];
+  return {
+    ...data,
+    detectionMethod: "OCR text comparison",
+    recommendedAction:
+      data.severity === FindingSeverity.Critical
+        ? "Supplier correction required"
+        : data.severity === FindingSeverity.Major
+          ? "Review and request correction if confirmed"
+          : "Reviewer confirmation recommended",
+    masterEvidenceSrc: snaps?.master ?? null,
+    supplierEvidenceSrc: snaps?.supplier ?? null,
+  };
+}
+
+const baseInspection = {
+  reviewerEmail: "sarah.chen@demo-company.com",
+  reviewerRole: "Quality Reviewer",
+  checklistIds: ["chk_text", "chk_barcode", "chk_symbols", "chk_metadata", "chk_missing"],
+  recommendationNote: "Pending human QA confirmation",
+  masterFileHash: "demo-b94d27b9c4e8f1a2037d6e5b4a2910c8f7e6d5c4b3a291807f6e5d4c3b2a1908f7",
+  supplierFileHash: "demo-a81f5f3c7e6d5c4b3a291807f6e5d4c3b2a1908f7e6d5c4b3a291807f6e5",
+  masterUploadedAt: "2025-01-15T09:32:00Z",
+  supplierUploadedAt: "2025-01-15T09:34:00Z",
+  checklistCompleted: { ...DEFAULT_CHECKLIST_COMPLETED },
+};
 
 export const seedInspections: Inspection[] = [
   {
+    ...baseInspection,
     id: DEMO_INSPECTION_ID,
-    title: "BioTouch Sample Collection Kit — Supplier Proof Review",
+    title: DEMO_FORM_TITLE,
     sku: "BT-SCK-240",
     revision: "REV-04",
+    supplierName: "Pacific Print Solutions",
     status: InspectionStatus.PendingReview,
     decision: ReviewDecision.Pending,
     createdAt: "2025-01-15T09:30:00Z",
     updatedAt: "2025-01-15T10:12:00Z",
+    dueDate: "2025-01-22T17:00:00Z",
     reviewerName: "Sarah Chen",
     masterFileRef: "files/master/bt-sck-240-rev04-approved.pdf",
     supplierFileRef: "files/supplier/bt-sck-240-supplier-proof-v1.pdf",
     profileRef: "profile_medical_device_01",
-    findingsCount: {
-      critical: 4,
-      major: 3,
-      minor: 3,
-    },
-    recommendation: "Reject — Supplier Correction Required",
+    findingsCount: { critical: 4, major: 3, minor: 3 },
+    recommendation: RECOMMENDATION_REJECT,
+    correctionStatus: CorrectionStatus.DraftNeeded,
   },
   {
+    ...baseInspection,
     id: "insp_pharma_002",
     title: "PharmaClear Vial Label — Print Proof Review",
     sku: "PC-VL-110",
-    revision: "REV-02",
-    status: InspectionStatus.Approved,
+    revision: "REV-07",
+    supplierName: "Apex Medical Print",
+    status: InspectionStatus.ApprovedWithNotes,
     decision: ReviewDecision.Approved,
     createdAt: "2025-01-12T14:00:00Z",
     updatedAt: "2025-01-12T16:45:00Z",
+    dueDate: "2025-01-19T17:00:00Z",
     reviewerName: "Marcus Webb",
-    masterFileRef: "files/master/pc-vl-110-rev02-approved.pdf",
+    reviewerEmail: "marcus.webb@demo-company.com",
+    masterFileRef: "files/master/pc-vl-110-rev07-approved.pdf",
     supplierFileRef: "files/supplier/pc-vl-110-supplier-proof.pdf",
-    profileRef: null,
-    findingsCount: {
-      critical: 0,
-      major: 0,
-      minor: 2,
-    },
+    profileRef: "profile_pharma_label_01",
+    findingsCount: { critical: 0, major: 1, minor: 2 },
     recommendation: null,
+    correctionStatus: CorrectionStatus.Closed,
+    masterFileHash: "demo-c12a45f9e8d7c6b5a4938271605f4e3d2c1b0a9f8e7d6c5b4a39281706f5e4d3",
+    supplierFileHash: "demo-d23b56a0f9e8d7c6b5a4938271605f4e3d2c1b0a9f8e7d6c5b4a39281706",
   },
   {
+    ...baseInspection,
     id: "insp_nutri_003",
-    title: "NutriBlend Protein Bar Wrapper — Artwork Review",
+    title: "NutriBlend Protein Bar Wrapper — Allergen Claim Review",
     sku: "NB-PB-500",
-    revision: "REV-07",
+    revision: "REV-B",
+    supplierName: "LabelWorks Midwest",
     status: InspectionStatus.Rejected,
     decision: ReviewDecision.CorrectionRequired,
     createdAt: "2025-01-10T11:20:00Z",
     updatedAt: "2025-01-11T09:00:00Z",
+    dueDate: "2025-01-17T17:00:00Z",
     reviewerName: "Sarah Chen",
-    masterFileRef: "files/master/nb-pb-500-rev07-approved.pdf",
+    masterFileRef: "files/master/nb-pb-500-revb-approved.pdf",
     supplierFileRef: "files/supplier/nb-pb-500-supplier-v2.pdf",
     profileRef: "profile_food_packaging_01",
-    findingsCount: {
-      critical: 2,
-      major: 4,
-      minor: 1,
-    },
-    recommendation: "Reject — Supplier Correction Required",
+    findingsCount: { critical: 2, major: 4, minor: 1 },
+    recommendation: RECOMMENDATION_REJECT,
+    correctionStatus: CorrectionStatus.AwaitingResubmission,
   },
   {
+    ...baseInspection,
     id: "insp_med_004",
     title: "MediSafe Syringe Blister — Compliance Check",
     sku: "MS-SB-320",
-    revision: "REV-01",
+    revision: "REV-C",
+    supplierName: "Sterling Packaging",
     status: InspectionStatus.Draft,
     decision: ReviewDecision.Pending,
     createdAt: "2025-01-16T08:00:00Z",
     updatedAt: "2025-01-16T08:00:00Z",
+    dueDate: null,
     reviewerName: "Marcus Webb",
+    reviewerEmail: "marcus.webb@demo-company.com",
     masterFileRef: "",
     supplierFileRef: "",
     profileRef: null,
-    findingsCount: {
-      critical: 0,
-      major: 0,
-      minor: 0,
-    },
+    checklistIds: [],
+    findingsCount: { critical: 0, major: 0, minor: 0 },
     recommendation: null,
+    correctionStatus: CorrectionStatus.NotStarted,
+    masterFileHash: null,
+    supplierFileHash: null,
+    masterUploadedAt: null,
+    supplierUploadedAt: null,
   },
 ];
 
 export const seedFindings: Finding[] = [
-  {
+  finding({
     id: "find_001",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Critical,
@@ -108,8 +175,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.98,
     evidenceRegion: { x: 418, y: 42, width: 74, height: 20, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_002",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Critical,
@@ -124,8 +191,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.99,
     evidenceRegion: { x: 38, y: 472, width: 226, height: 92, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_003",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Critical,
@@ -140,8 +207,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.96,
     evidenceRegion: { x: 30, y: 384, width: 260, height: 24, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_004",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Critical,
@@ -156,8 +223,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.97,
     evidenceRegion: { x: 30, y: 316, width: 300, height: 24, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_005",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Major,
@@ -172,8 +239,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.95,
     evidenceRegion: { x: 30, y: 350, width: 340, height: 24, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_006",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Major,
@@ -188,8 +255,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.99,
     evidenceRegion: { x: 116, y: 100, width: 122, height: 26, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_007",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Major,
@@ -204,15 +271,15 @@ export const seedFindings: Finding[] = [
     confidence: 0.92,
     evidenceRegion: { x: 38, y: 188, width: 84, height: 64, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_008",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Minor,
     category: FindingCategory.Layout,
     title: "Logo position shifted",
     description:
-      "Company logo appears shifted approximately 4mm to the right compared to the approved master. Potential mismatch in layout positioning.",
+      "Company logo appears shifted approximately 4mm to the right compared to the approved master.",
     sourceValue: "Logo anchored at x:24",
     supplierValue: "Logo positioned at x:36",
     location: "Header, logo area",
@@ -220,8 +287,8 @@ export const seedFindings: Finding[] = [
     confidence: 0.78,
     evidenceRegion: { x: 18, y: 16, width: 64, height: 46, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_009",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Minor,
@@ -236,15 +303,15 @@ export const seedFindings: Finding[] = [
     confidence: 0.72,
     evidenceRegion: { x: 0, y: 0, width: 500, height: 72, pageNumber: 1 },
     reviewerVerified: null,
-  },
-  {
+  }),
+  finding({
     id: "find_010",
     inspectionId: DEMO_INSPECTION_ID,
     severity: FindingSeverity.Minor,
     category: FindingCategory.Typography,
     title: "SKU font weight changed",
     description:
-      "The SKU identifier appears to use a medium font weight instead of the approved regular weight. Potential mismatch in typography.",
+      "The SKU identifier appears to use a medium font weight instead of the approved regular weight.",
     sourceValue: "Regular (400)",
     supplierValue: "Medium (500)",
     location: "Header, SKU label area",
@@ -252,77 +319,90 @@ export const seedFindings: Finding[] = [
     confidence: 0.68,
     evidenceRegion: { x: 372, y: 18, width: 120, height: 20, pageNumber: 1 },
     reviewerVerified: null,
-  },
+  }),
 ];
 
 export const seedAuditEvents: AuditEvent[] = [
-  {
+  auditEvent({
     id: "audit_001",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.InspectionCreated,
     actor: "Sarah Chen",
     timestamp: "2025-01-15T09:30:00Z",
-    metadata: { title: "BioTouch Sample Collection Kit — Supplier Proof Review" },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 9:30 AM EST",
+    metadata: { title: DEMO_FORM_TITLE },
+  }),
+  auditEvent({
     id: "audit_002",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.MasterFileUploaded,
     actor: "Sarah Chen",
     timestamp: "2025-01-15T09:32:00Z",
-    metadata: { fileName: "bt-sck-240-rev04-approved.pdf", fileSize: "2.4 MB" },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 9:32 AM EST",
+    metadata: {
+      fileName: "bt-sck-240-rev04-approved.pdf",
+      sha256: "demo-b94d27b9...",
+    },
+  }),
+  auditEvent({
     id: "audit_003",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.SupplierFileUploaded,
     actor: "Sarah Chen",
     timestamp: "2025-01-15T09:34:00Z",
-    metadata: { fileName: "bt-sck-240-supplier-proof-v1.pdf", fileSize: "2.1 MB" },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 9:34 AM EST",
+    metadata: {
+      fileName: "bt-sck-240-supplier-proof-v1.pdf",
+      sha256: "demo-a81f5f3c...",
+    },
+  }),
+  auditEvent({
     id: "audit_004",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.ComparisonStarted,
     actor: "System",
     timestamp: "2025-01-15T09:35:00Z",
-    metadata: { engine: "mock_comparison_v1" },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 9:35 AM EST",
+    metadata: { engine: "deterministic_v1" },
+  }),
+  auditEvent({
     id: "audit_005",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.ComparisonCompleted,
     actor: "System",
     timestamp: "2025-01-15T10:10:00Z",
-    metadata: { duration: "35 minutes", pagesProcessed: "4" },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 10:10 AM EST",
+    metadata: { duration: "35 minutes", pagesProcessed: "1" },
+  }),
+  auditEvent({
     id: "audit_006",
     inspectionId: DEMO_INSPECTION_ID,
     action: AuditAction.FindingsGenerated,
     actor: "System",
     timestamp: "2025-01-15T10:12:00Z",
-    metadata: {
-      totalFindings: "10",
-      critical: "4",
-      major: "3",
-      minor: "3",
-    },
-  },
-  {
+    timestampLocal: "Jan 15, 2025, 10:12 AM EST",
+    metadata: { totalFindings: "10", critical: "4", major: "3", minor: "3" },
+  }),
+  auditEvent({
     id: "audit_007",
     inspectionId: "insp_pharma_002",
     action: AuditAction.DecisionMade,
     actor: "Marcus Webb",
     timestamp: "2025-01-12T16:45:00Z",
-    metadata: { decision: "approved" },
-  },
-  {
+    timestampLocal: "Jan 12, 2025, 4:45 PM EST",
+    metadata: { decision: "approved_with_notes" },
+  }),
+  auditEvent({
     id: "audit_008",
     inspectionId: "insp_nutri_003",
     action: AuditAction.DecisionMade,
     actor: "Sarah Chen",
     timestamp: "2025-01-11T09:00:00Z",
+    timestampLocal: "Jan 11, 2025, 9:00 AM EST",
     metadata: { decision: "correction_required" },
-  },
+  }),
 ];
+
+export function isDemoFormSubmission(title: string, supplierName: string): boolean {
+  return title === DEMO_FORM_TITLE && supplierName === "Pacific Print Solutions";
+}

@@ -130,21 +130,6 @@ const actionConfig: Record<
   },
 };
 
-function formatTimestamp(ts: string): { date: string; time: string } {
-  const d = new Date(ts);
-  return {
-    date: d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-    time: d.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    }),
-  };
-}
-
 export function AuditTimeline({ events }: AuditTimelineProps) {
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -164,7 +149,6 @@ export function AuditTimeline({ events }: AuditTimelineProps) {
           {sortedEvents.map((event, idx) => {
             const config = actionConfig[event.action];
             const Icon = config.icon;
-            const { date, time } = formatTimestamp(event.timestamp);
             const isLast = idx === sortedEvents.length - 1;
 
             return (
@@ -205,7 +189,11 @@ export function AuditTimeline({ events }: AuditTimelineProps) {
                         {config.detail}
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {event.actor} &middot; {date} at {time}
+                        {event.actor} ({event.actorRole.replace(/_/g, " ")}) ·{" "}
+                        {event.timestampLocal}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                        {event.eventId} · source: {event.source}
                       </p>
                     </div>
                   </div>

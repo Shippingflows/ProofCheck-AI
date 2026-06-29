@@ -11,8 +11,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ResetDemoButton } from "@/components/shared/reset-demo-button";
-import { IS_DEMO_MODE } from "@/lib/demo";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -67,16 +65,10 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="space-y-3 border-t border-border px-4 py-3">
-        {IS_DEMO_MODE && <ResetDemoButton />}
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Prototype v0.1</p>
-          {IS_DEMO_MODE && (
-            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-indigo-700">
-              Demo
-            </span>
-          )}
-        </div>
+      <div className="border-t border-border px-4 py-3">
+        <p className="text-[10px] text-muted-foreground/70">
+          Pilot workspace
+        </p>
       </div>
     </aside>
   );

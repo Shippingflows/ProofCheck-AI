@@ -5,6 +5,7 @@ import { RecentInspections } from "@/components/dashboard/recent-inspections";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { AppShell } from "@/components/layout/app-shell";
 import { OnboardingPanel } from "@/components/shared/onboarding-panel";
+import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
 
 export default function DashboardPage() {
   return (
@@ -25,7 +26,8 @@ export default function DashboardPage() {
           <div className="col-span-2">
             <RecentInspections />
           </div>
-          <div className="col-span-1">
+          <div className="col-span-1 space-y-4">
+            <WhatProofCheckReviews />
             <ActivityFeed />
           </div>
         </div>

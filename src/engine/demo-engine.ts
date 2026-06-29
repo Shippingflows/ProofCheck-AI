@@ -9,6 +9,7 @@ import {
   VisualDiff,
 } from "@/domain/comparison-engine";
 import { seedFindings, DEMO_INSPECTION_ID } from "@/data/seed";
+import { RECOMMENDATION_REJECT } from "@/lib/recommendations";
 
 /**
  * Demo engine that returns seeded findings.
@@ -53,7 +54,7 @@ export class DemoEngine implements ComparisonEngine {
       minor,
       recommendation:
         critical > 0
-          ? "Reject — Supplier Correction Required"
+          ? RECOMMENDATION_REJECT
           : "Review Recommended",
       confidence: 0.95,
     };

@@ -2,9 +2,14 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useStats } from "@/hooks/use-inspections";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  Send,
+  XCircle,
+  Timer,
+} from "lucide-react";
 import { InfoTooltip } from "@/components/shared/info-tooltip";
-import { IS_DEMO_MODE } from "@/lib/demo";
 
 const statConfig = [
   {
@@ -22,18 +27,26 @@ const statConfig = [
     bgColor: "bg-amber-50",
   },
   {
-    key: "approved" as const,
-    label: "Approved",
-    icon: CheckCircle,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
+    key: "supplierCorrectionsPending" as const,
+    label: "Corrections Pending",
+    icon: Send,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
   },
   {
-    key: "rejected" as const,
-    label: "Rejected",
+    key: "rejectedThisMonth" as const,
+    label: "Rejected This Month",
     icon: XCircle,
     color: "text-red-600",
     bgColor: "bg-red-50",
+  },
+  {
+    key: "avgReviewTimeMinutes" as const,
+    label: "Avg Review Time",
+    icon: Timer,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    suffix: " min",
   },
 ];
 
@@ -44,17 +57,11 @@ export function StatsCards() {
     <div className="space-y-2">
       <div className="flex items-center gap-1.5">
         <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {IS_DEMO_MODE ? "Demo metrics" : "Metrics"}
+          Pilot metrics
         </h3>
-        <InfoTooltip
-          content={
-            IS_DEMO_MODE
-              ? "These are illustrative figures based on seeded sample data, not live production metrics."
-              : "Estimated figures based on recorded inspections."
-          }
-        />
+        <InfoTooltip content="Illustrative figures from the pilot sample dataset — not live production metrics." />
       </div>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         {statConfig.map((stat) => (
           <Card key={stat.key} className="border border-border shadow-none">
             <CardContent className="flex items-center gap-4 p-5">
@@ -68,7 +75,10 @@ export function StatsCards() {
                   {isLoading || !stats ? (
                     <span className="inline-block h-7 w-8 animate-pulse rounded bg-muted align-middle" />
                   ) : (
-                    stats[stat.key]
+                    <>
+                      {stats[stat.key]}
+                      {"suffix" in stat ? stat.suffix : ""}
+                    </>
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground">{stat.label}</p>

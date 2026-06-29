@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ApprovalDecision } from "@/components/audit/approval-decision";
 import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { useInspection, useAuditEvents } from "@/hooks/use-inspections";
@@ -8,10 +9,14 @@ import { addAuditEvent } from "@/data/mock-repository";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AuditAction } from "@/domain/enums";
-import { useRouter } from "next/navigation";
 import { ErrorState } from "@/components/shared/state-views";
-import { DemoBadge } from "@/components/shared/demo-badge";
-import { isDemoInspection } from "@/lib/demo";
+import { InspectionProfileCard } from "@/components/shared/inspection-profile-card";
+import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
+import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
+import { FileLineageCard } from "@/components/shared/file-lineage-card";
+import { AuditIntegrityBlock } from "@/components/shared/audit-integrity-block";
+import { ExportQcReportPreview } from "@/components/shared/export-qc-report-preview";
+import { CorrectionStatusTracker } from "@/components/shared/correction-status-tracker";
 
 interface AuditPageContentProps {
   inspectionId: string;
@@ -64,15 +69,12 @@ export function AuditPageContent({ inspectionId }: AuditPageContentProps) {
   }
 
   return (
-    <>
+  <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-foreground">
-              Approval Record &amp; Audit Trail
-            </h2>
-            {isDemoInspection(inspectionId) && <DemoBadge />}
-          </div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Approval Record &amp; Audit Trail
+          </h2>
           <p className="text-sm text-muted-foreground">
             {inspection.title}
           </p>
@@ -83,7 +85,13 @@ export function AuditPageContent({ inspectionId }: AuditPageContentProps) {
         </Button>
       </div>
 
-      {/* Inspection summary */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <InspectionProfileCard profileRef={inspection.profileRef} />
+        <WhatProofCheckReviews />
+      </div>
+
+      <CorrectionStatusTracker status={inspection.correctionStatus} />
+
       <Card className="border border-border shadow-none">
         <CardContent className="grid grid-cols-4 gap-4 p-5">
           <div>
@@ -107,17 +115,31 @@ export function AuditPageContent({ inspectionId }: AuditPageContentProps) {
           <div>
             <p className="text-xs text-muted-foreground">Status</p>
             <p className="text-sm font-medium text-foreground capitalize">
-              {inspection.status.replace("_", " ")}
+              {inspection.status.replace(/_/g, " ")}
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Approval Decision */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <FileLineageCard inspection={inspection} />
+        <AuditIntegrityBlock
+          events={events}
+          masterHash={inspection.masterFileHash}
+          supplierHash={inspection.supplierFileHash}
+        />
+      </div>
+
+      <ExportQcReportPreview inspection={inspection} onExport={handleExport} />
+
       <ApprovalDecision inspectionId={inspectionId} />
 
-      {/* Audit Timeline */}
+      <ReviewerChecklistPanel
+        inspectionId={inspectionId}
+        completed={inspection.checklistCompleted}
+      />
+
       <AuditTimeline events={events} />
-    </>
+    </div>
   );
 }

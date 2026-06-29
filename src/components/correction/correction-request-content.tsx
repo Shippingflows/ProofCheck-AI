@@ -9,15 +9,17 @@ import {
   AlertTriangle,
   Info,
   Loader2,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Finding, Inspection } from "@/domain/models";
-import { FindingSeverity, AuditAction } from "@/domain/enums";
+import { FindingSeverity, AuditAction, CorrectionStatus } from "@/domain/enums";
 import { cn } from "@/lib/utils";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
-import { addAuditEvent } from "@/data/mock-repository";
+import { addAuditEvent, updateInspection } from "@/data/mock-repository";
+import { CorrectionStatusTracker } from "@/components/shared/correction-status-tracker";
 import { ErrorState, EmptyState } from "@/components/shared/state-views";
 
 interface CorrectionRequestContentProps {
@@ -31,35 +33,43 @@ const severityConfig = {
     icon: AlertCircle,
     label: "Critical",
     badgeClass: "bg-red-100 text-red-700 border-red-200",
+    iconClass: "text-red-600",
   },
   [FindingSeverity.Major]: {
     icon: AlertTriangle,
     label: "Major",
     badgeClass: "bg-amber-100 text-amber-700 border-amber-200",
+    iconClass: "text-amber-600",
   },
   [FindingSeverity.Minor]: {
     icon: Info,
     label: "Minor",
     badgeClass: "bg-slate-100 text-slate-600 border-slate-200",
+    iconClass: "text-slate-500",
   },
 };
 
-function generateEmailDraft(
+function generateEmailSubject(inspection: Inspection): string {
+  return `Correction Required — ${inspection.title} Proof ${inspection.sku} ${inspection.revision}`;
+}
+
+function generateEmailBody(
   inspection: Inspection,
   selectedFindings: Finding[]
 ): string {
   const lines: string[] = [];
 
-  lines.push(`Subject: Correction Required — ${inspection.title}`);
-  lines.push("");
-  lines.push("Dear Supplier,");
+  lines.push(`Hi ${inspection.supplierName || "Pacific Print Solutions"},`);
   lines.push("");
   lines.push(
-    `Following our proof review of "${inspection.title}" (SKU: ${inspection.sku}, Revision: ${inspection.revision}), we have identified the following items requiring correction before production approval can be granted.`
+    `We completed a structured proof review for ${inspection.title} (SKU ${inspection.sku}, revision ${inspection.revision}) against the approved master.`
   );
   lines.push("");
-  lines.push(`Total findings: ${selectedFindings.length}`);
+  lines.push(
+    "The supplier proof does not match the approved master in the areas listed below. Please correct each item and resubmit a revised proof file for re-inspection."
+  );
   lines.push("");
+  lines.push("Summary of required corrections:");
 
   const critical = selectedFindings.filter(
     (f) => f.severity === FindingSeverity.Critical
@@ -71,66 +81,49 @@ function generateEmailDraft(
     (f) => f.severity === FindingSeverity.Minor
   );
 
+  let counter = 1;
+
   if (critical.length > 0) {
-    lines.push("── CRITICAL (must be corrected) ──");
-    lines.push("");
-    critical.forEach((f, i) => {
-      lines.push(`${i + 1}. ${f.title}`);
-      lines.push(`   Location: ${f.location}, Page ${f.pageNumber}`);
-      if (f.sourceValue)
-        lines.push(`   Approved value: ${f.sourceValue}`);
-      if (f.supplierValue)
-        lines.push(`   Supplier value: ${f.supplierValue}`);
-      else lines.push(`   Supplier value: MISSING`);
-      lines.push(`   ${f.description}`);
+    lines.push("Critical:");
+    critical.forEach((f) => {
+      lines.push(`${counter}. ${f.title}`);
+      if (f.sourceValue) lines.push(`   Approved: ${f.sourceValue}`);
+      if (f.supplierValue) lines.push(`   Supplier proof: ${f.supplierValue}`);
+      else lines.push(`   Supplier proof: Missing`);
+      if (f.location) lines.push(`   Location: ${f.location}`);
       lines.push("");
+      counter++;
     });
   }
 
   if (major.length > 0) {
-    lines.push("── MAJOR (correction required) ──");
-    lines.push("");
-    major.forEach((f, i) => {
-      lines.push(`${i + 1}. ${f.title}`);
-      lines.push(`   Location: ${f.location}, Page ${f.pageNumber}`);
-      if (f.sourceValue)
-        lines.push(`   Approved value: ${f.sourceValue}`);
-      if (f.supplierValue)
-        lines.push(`   Supplier value: ${f.supplierValue}`);
-      else lines.push(`   Supplier value: MISSING`);
-      lines.push(`   ${f.description}`);
+    lines.push("Major:");
+    major.forEach((f) => {
+      lines.push(`${counter}. ${f.title}`);
+      if (f.sourceValue) lines.push(`   Approved: ${f.sourceValue}`);
+      if (f.supplierValue) lines.push(`   Supplier proof: ${f.supplierValue}`);
+      if (f.location) lines.push(`   Location: ${f.location}`);
       lines.push("");
+      counter++;
     });
   }
 
   if (minor.length > 0) {
-    lines.push("── MINOR (review recommended) ──");
-    lines.push("");
-    minor.forEach((f, i) => {
-      lines.push(`${i + 1}. ${f.title}`);
-      lines.push(`   Location: ${f.location}, Page ${f.pageNumber}`);
-      if (f.sourceValue)
-        lines.push(`   Approved value: ${f.sourceValue}`);
-      if (f.supplierValue)
-        lines.push(`   Supplier value: ${f.supplierValue}`);
-      lines.push(`   ${f.description}`);
+    lines.push("Minor:");
+    minor.forEach((f) => {
+      lines.push(`${counter}. ${f.title}`);
       lines.push("");
+      counter++;
     });
   }
 
-  lines.push("──────────────────────────────────");
-  lines.push("");
   lines.push(
-    "Please submit a revised proof addressing all items marked Critical and Major. Minor items are noted for your review."
-  );
-  lines.push("");
-  lines.push(
-    "A revised proof must be submitted for re-inspection before production can proceed."
+    "Please resubmit an updated proof with these corrections applied."
   );
   lines.push("");
   lines.push("Regards,");
   lines.push(inspection.reviewerName);
-  lines.push("Quality Assurance Team");
+  lines.push("Quality Review");
 
   return lines.join("\n");
 }
@@ -145,14 +138,16 @@ export function CorrectionRequestContent({
   );
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
+  const [dueDate, setDueDate] = useState("");
 
   const selectedFindings = useMemo(
     () => findings.filter((f) => selectedIds.has(f.id)),
     [findings, selectedIds]
   );
 
-  const [emailDraft, setEmailDraft] = useState(() =>
-    generateEmailDraft(inspection, findings)
+  const [subject, setSubject] = useState(() => generateEmailSubject(inspection));
+  const [emailBody, setEmailBody] = useState(() =>
+    generateEmailBody(inspection, findings)
   );
 
   const toggleFinding = (id: string) => {
@@ -164,12 +159,15 @@ export function CorrectionRequestContent({
     });
   };
 
-  const regenerateEmail = () => {
-    setEmailDraft(generateEmailDraft(inspection, selectedFindings));
+  const regenerateDraft = () => {
+    setSubject(generateEmailSubject(inspection));
+    setEmailBody(generateEmailBody(inspection, selectedFindings));
   };
 
+  const fullEmailText = `To: Pacific Print Solutions\nSubject: ${subject}\n\n${emailBody}`;
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(emailDraft);
+    await navigator.clipboard.writeText(fullEmailText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -181,6 +179,8 @@ export function CorrectionRequestContent({
 
   return (
     <div className="space-y-6">
+      <CorrectionStatusTracker status={inspection.correctionStatus} />
+
       {/* Inspection details */}
       <Card className="border border-border shadow-none">
         <CardContent className="grid grid-cols-3 gap-4 p-5">
@@ -240,9 +240,7 @@ export function CorrectionRequestContent({
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <Icon
-                          className={cn("h-3 w-3 shrink-0", config.badgeClass.includes("red") ? "text-red-600" : config.badgeClass.includes("amber") ? "text-amber-600" : "text-slate-500")}
-                        />
+                        <Icon className={cn("h-3 w-3 shrink-0", config.iconClass)} />
                         <span className="truncate text-xs font-medium text-foreground">
                           {finding.title}
                         </span>
@@ -263,7 +261,7 @@ export function CorrectionRequestContent({
           <Button
             variant="outline"
             size="sm"
-            onClick={regenerateEmail}
+            onClick={regenerateDraft}
             className="w-full"
           >
             Regenerate Draft
@@ -276,17 +274,79 @@ export function CorrectionRequestContent({
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Correction Request Draft</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <textarea
-                value={emailDraft}
-                onChange={(e) => setEmailDraft(e.target.value)}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-xs leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                rows={24}
-              />
+            <CardContent className="space-y-4">
+              {/* To */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">To</label>
+                <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
+                  Pacific Print Solutions
+                </div>
+              </div>
 
-              <div className="flex items-center justify-between pt-2">
+              {/* Subject */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Subject</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+
+              {/* Body */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Body</label>
+                <textarea
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-xs leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  rows={20}
+                />
+              </div>
+
+              {/* Included findings summary */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Included findings ({selectedFindings.length})
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedFindings.length === 0 ? (
+                    <span className="text-xs text-muted-foreground">None selected</span>
+                  ) : (
+                    selectedFindings.map((f) => {
+                      const config = severityConfig[f.severity];
+                      return (
+                        <Badge
+                          key={f.id}
+                          variant="outline"
+                          className={cn("text-[10px]", config.badgeClass)}
+                        >
+                          {f.title}
+                        </Badge>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Supplier response due date */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  Supplier response due date
+                </label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
                 <p className="text-xs text-muted-foreground">
-                  No email will be sent. This is a draft preview only.
+                  Demo only — no email is sent automatically.
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -342,16 +402,20 @@ export function CorrectionRequestWrapper({
   } = useFindings(inspectionId);
 
   const handleMarkSent = useCallback(async () => {
+    await updateInspection(inspectionId, {
+      correctionStatus: CorrectionStatus.SentToSupplier,
+    });
     await addAuditEvent({
       inspectionId,
       action: AuditAction.CorrectionRequestSent,
       actor: inspection?.reviewerName ?? "Unknown",
       metadata: {
         findingsIncluded: String(findings.length),
-        supplier: "Pacific Print Solutions",
+        supplier: inspection?.supplierName || "Pacific Print Solutions",
+        correctionStatus: CorrectionStatus.SentToSupplier,
       },
     });
-  }, [inspectionId, inspection?.reviewerName, findings.length]);
+  }, [inspectionId, inspection?.reviewerName, inspection?.supplierName, findings.length]);
 
   if (loadingInspection || loadingFindings) {
     return (

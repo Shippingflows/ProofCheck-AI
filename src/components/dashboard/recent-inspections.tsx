@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useInspections } from "@/hooks/use-inspections";
-import { InspectionStatus } from "@/domain/enums";
+import { CorrectionStatus, InspectionStatus } from "@/domain/enums";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { FileSearch } from "lucide-react";
@@ -20,8 +20,8 @@ import {
   ErrorState,
   EmptyState,
 } from "@/components/shared/state-views";
-import { DemoBadge } from "@/components/shared/demo-badge";
-import { isDemoInspection } from "@/lib/demo";
+import { formatSeverityCounts } from "@/lib/format-severity";
+import { correctionStatusLabel } from "@/lib/correction-status";
 
 function statusLabel(status: InspectionStatus): string {
   const map: Record<InspectionStatus, string> = {
@@ -30,6 +30,7 @@ function statusLabel(status: InspectionStatus): string {
     [InspectionStatus.Comparing]: "Comparing",
     [InspectionStatus.PendingReview]: "Pending Review",
     [InspectionStatus.Approved]: "Approved",
+    [InspectionStatus.ApprovedWithNotes]: "Approved w/ Notes",
     [InspectionStatus.Rejected]: "Rejected",
   };
   return map[status];
@@ -38,6 +39,7 @@ function statusLabel(status: InspectionStatus): string {
 function statusVariant(status: InspectionStatus) {
   switch (status) {
     case InspectionStatus.Approved:
+    case InspectionStatus.ApprovedWithNotes:
       return "bg-emerald-50 text-emerald-700 border-emerald-200";
     case InspectionStatus.Rejected:
       return "bg-red-50 text-red-700 border-red-200";
@@ -50,7 +52,8 @@ function statusVariant(status: InspectionStatus) {
   }
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -92,11 +95,14 @@ export function RecentInspections() {
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="pl-6">Title</TableHead>
+              <TableHead>Supplier</TableHead>
               <TableHead>SKU</TableHead>
+              <TableHead>Revision</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Findings</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="pr-6">Reviewer</TableHead>
+              <TableHead>Due</TableHead>
+              <TableHead>Reviewer</TableHead>
+              <TableHead className="pr-6">Correction</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -106,14 +112,17 @@ export function RecentInspections() {
                 className="cursor-pointer"
                 onClick={() => router.push(`/comparison/${inspection.id}`)}
               >
-                <TableCell className="max-w-[280px] pl-6 font-medium">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate">{inspection.title}</span>
-                    {isDemoInspection(inspection.id) && <DemoBadge />}
-                  </div>
+                <TableCell className="max-w-[200px] pl-6 font-medium">
+                  <span className="truncate">{inspection.title}</span>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {inspection.supplierName || "—"}
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   {inspection.sku}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {inspection.revision}
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -126,14 +135,19 @@ export function RecentInspections() {
                     {statusLabel(inspection.status)}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <FindingsBadges counts={inspection.findingsCount} />
+                <TableCell className="text-xs text-foreground">
+                  {formatSeverityCounts(inspection.findingsCount)}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(inspection.createdAt)}
+                  {formatDate(inspection.dueDate)}
                 </TableCell>
-                <TableCell className="pr-6 text-sm text-muted-foreground">
+                <TableCell className="text-sm text-muted-foreground">
                   {inspection.reviewerName}
+                </TableCell>
+                <TableCell className="pr-6 text-xs text-muted-foreground">
+                  {inspection.correctionStatus === CorrectionStatus.NotStarted
+                    ? "—"
+                    : correctionStatusLabel(inspection.correctionStatus)}
                 </TableCell>
               </TableRow>
             ))}
@@ -142,36 +156,5 @@ export function RecentInspections() {
         )}
       </CardContent>
     </Card>
-  );
-}
-
-function FindingsBadges({
-  counts,
-}: {
-  counts: { critical: number; major: number; minor: number };
-}) {
-  const total = counts.critical + counts.major + counts.minor;
-  if (total === 0) {
-    return <span className="text-xs text-muted-foreground">—</span>;
-  }
-
-  return (
-    <div className="flex items-center gap-1.5">
-      {counts.critical > 0 && (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded px-1 bg-red-100 text-xs font-medium text-red-700">
-          {counts.critical}
-        </span>
-      )}
-      {counts.major > 0 && (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded px-1 bg-amber-100 text-xs font-medium text-amber-700">
-          {counts.major}
-        </span>
-      )}
-      {counts.minor > 0 && (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded px-1 bg-slate-100 text-xs font-medium text-slate-600">
-          {counts.minor}
-        </span>
-      )}
-    </div>
   );
 }

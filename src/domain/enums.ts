@@ -4,7 +4,31 @@ export enum InspectionStatus {
   Comparing = "comparing",
   PendingReview = "pending_review",
   Approved = "approved",
+  ApprovedWithNotes = "approved_with_notes",
   Rejected = "rejected",
+}
+
+export enum CorrectionStatus {
+  NotStarted = "not_started",
+  DraftNeeded = "draft_needed",
+  DraftPrepared = "draft_prepared",
+  SentToSupplier = "sent_to_supplier",
+  AwaitingResubmission = "awaiting_resubmission",
+  Resubmitted = "resubmitted",
+  ReInspectionRequired = "re_inspection_required",
+  Closed = "closed",
+}
+
+export enum AuditActorRole {
+  QualityReviewer = "quality_reviewer",
+  System = "system",
+  Supplier = "supplier",
+  Admin = "admin",
+}
+
+export enum AuditEventSource {
+  System = "system",
+  Reviewer = "reviewer",
 }
 
 export enum FindingSeverity {

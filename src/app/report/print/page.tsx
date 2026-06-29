@@ -7,6 +7,7 @@ import { DEMO_INSPECTION_ID } from "@/data/seed";
 import { FindingSeverity, FindingCategory } from "@/domain/enums";
 import { Finding } from "@/domain/models";
 import { QueryProvider } from "@/lib/query-client";
+import { RECOMMENDATION_PENDING_NOTE, formatRecommendation } from "@/lib/recommendations";
 
 const severityLabels: Record<FindingSeverity, string> = {
   [FindingSeverity.Critical]: "CRITICAL",
@@ -97,7 +98,12 @@ function PrintReportInner() {
           Recommendation
         </p>
         <p className="mt-1 text-sm font-bold">
-          {inspection.recommendation ?? "Pending Review"}
+          {inspection.recommendation
+            ? formatRecommendation(inspection.recommendation).action
+            : "Pending Review"}
+        </p>
+        <p className="mt-1 text-xs text-slate-600">
+          {inspection.recommendationNote ?? RECOMMENDATION_PENDING_NOTE}
         </p>
         <p className="mt-1 text-xs text-slate-600">
           {inspection.findingsCount.critical} Critical ·{" "}
@@ -105,6 +111,19 @@ function PrintReportInner() {
           {inspection.findingsCount.minor} Minor
         </p>
       </div>
+
+      {/* File integrity */}
+      {(inspection.masterFileHash || inspection.supplierFileHash) && (
+        <div className="mb-6 rounded border border-slate-200 px-4 py-3 text-[10px]">
+          <p className="font-bold uppercase text-slate-500">File Hashes</p>
+          {inspection.masterFileHash && (
+            <p className="mt-1 font-mono">Master: {inspection.masterFileHash}</p>
+          )}
+          {inspection.supplierFileHash && (
+            <p className="mt-1 font-mono">Supplier: {inspection.supplierFileHash}</p>
+          )}
+        </div>
+      )}
 
       {/* Findings table */}
       <h2 className="mb-2 text-sm font-bold">Findings Detail</h2>
@@ -150,6 +169,7 @@ function PrintReportInner() {
       <table className="mb-6 w-full border-collapse text-[10px]">
         <thead>
           <tr className="border-b border-slate-300 text-left">
+            <th className="py-1.5 pr-2 font-semibold">Event ID</th>
             <th className="py-1.5 pr-2 font-semibold">Timestamp</th>
             <th className="py-1.5 pr-2 font-semibold">Event</th>
             <th className="py-1.5 pr-2 font-semibold">Actor</th>
@@ -159,18 +179,16 @@ function PrintReportInner() {
         <tbody>
           {sortedEvents.map((e) => (
             <tr key={e.id} className="border-b border-slate-200">
+              <td className="py-1.5 pr-2 font-mono">{e.eventId}</td>
               <td className="py-1.5 pr-2 whitespace-nowrap">
-                {new Date(e.timestamp).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
+                {e.timestampLocal}
               </td>
               <td className="py-1.5 pr-2">
                 {e.action.replace(/_/g, " ")}
               </td>
-              <td className="py-1.5 pr-2">{e.actor}</td>
+              <td className="py-1.5 pr-2">
+                {e.actor} ({e.actorRole})
+              </td>
               <td className="py-1.5">
                 {Object.entries(e.metadata)
                   .map(([k, v]) => `${k}: ${v}`)

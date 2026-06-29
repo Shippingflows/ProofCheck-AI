@@ -6,8 +6,6 @@ import {
   Info,
   XCircle,
   FileText,
-  CheckSquare,
-  Square,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
@@ -24,10 +22,14 @@ import { Badge } from "@/components/ui/badge";
 import { Inspection, Finding } from "@/domain/models";
 import { FindingSeverity, FindingCategory } from "@/domain/enums";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { ErrorState } from "@/components/shared/state-views";
 import { InfoTooltip } from "@/components/shared/info-tooltip";
+import { InspectionProfileCard } from "@/components/shared/inspection-profile-card";
+import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
+import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
+import { ExportQcReportPreview } from "@/components/shared/export-qc-report-preview";
+import { formatRecommendation } from "@/lib/recommendations";
 import {
   isPotentialMismatch,
   whyFlagged,
@@ -73,15 +75,6 @@ const categoryLabels: Record<FindingCategory, string> = {
   [FindingCategory.Metadata]: "Metadata",
   [FindingCategory.MissingElement]: "Missing Elements",
 };
-
-const REVIEW_CHECKLIST = [
-  { id: "ck_1", label: "All critical findings have been individually reviewed" },
-  { id: "ck_2", label: "Barcode values confirmed against approved specification" },
-  { id: "ck_3", label: "Regulatory text and symbols verified" },
-  { id: "ck_4", label: "Storage and handling instructions checked" },
-  { id: "ck_5", label: "Visual layout and brand consistency assessed" },
-  { id: "ck_6", label: "Recommendation reviewed and confirmed by reviewer" },
-];
 
 function generateSummary(inspection: Inspection, findings: Finding[]): string {
   const critical = findings.filter((f) => f.severity === FindingSeverity.Critical);
@@ -134,7 +127,6 @@ export function FindingsReportContent({
     isLoading: loadingFindings,
     isError: findingsError,
   } = useFindings(inspectionId);
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   if (loadingInspection || loadingFindings) {
     return (
@@ -168,12 +160,11 @@ export function FindingsReportContent({
     {} as Record<FindingCategory, Finding[]>
   );
 
-  const toggleCheck = (id: string) => {
-    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
   const hasFindings = findings.length > 0;
   const hasCritical = inspection.findingsCount.critical > 0;
+  const recommendation = inspection.recommendation
+    ? formatRecommendation(inspection.recommendation)
+    : null;
   const recTone = !hasFindings
     ? {
         border: "border-emerald-200",
@@ -198,6 +189,11 @@ export function FindingsReportContent({
 
   return (
     <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <InspectionProfileCard profileRef={inspection.profileRef} />
+        <WhatProofCheckReviews />
+      </div>
+
       {/* Recommendation card */}
       <Card className={cn("border-2 shadow-none", recTone.border)}>
         <CardContent className="flex items-center gap-4 p-5">
@@ -213,12 +209,12 @@ export function FindingsReportContent({
             <p className="text-lg font-semibold text-foreground">
               {!hasFindings
                 ? "No significant differences found"
-                : (inspection.recommendation ?? "Pending Review")}
+                : (recommendation?.action ?? "Pending Review")}
             </p>
             <p className="text-sm text-muted-foreground">
               {!hasFindings
                 ? "Automated checks did not detect differences. A human reviewer should still confirm before approval."
-                : `${findings.length} potential ${findings.length === 1 ? "difference" : "differences"} found · requires human confirmation`}
+                : recommendation?.note ?? `${findings.length} potential differences found · requires human confirmation`}
             </p>
           </div>
           {hasFindings && (
@@ -350,51 +346,12 @@ export function FindingsReportContent({
         </Card>
       ))}
 
-      {/* Human review checklist */}
-      <Card className="border border-border shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CheckSquare className="h-4 w-4 text-primary" />
-            Human Review Checklist
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-xs text-muted-foreground">
-            Complete all items before making a final approval or rejection
-            decision.
-          </p>
-          <div className="space-y-2">
-            {REVIEW_CHECKLIST.map((item) => (
-              <label
-                key={item.id}
-                className="flex cursor-pointer items-center gap-3 rounded-md border border-border px-3 py-2.5 transition-colors hover:bg-accent has-[:checked]:border-primary/30 has-[:checked]:bg-primary/5"
-              >
-                <input
-                  type="checkbox"
-                  checked={!!checked[item.id]}
-                  onChange={() => toggleCheck(item.id)}
-                  className="sr-only"
-                />
-                {checked[item.id] ? (
-                  <CheckSquare className="h-4 w-4 shrink-0 text-primary" />
-                ) : (
-                  <Square className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
-                <span
-                  className={cn(
-                    "text-sm",
-                    checked[item.id]
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {item.label}
-                </span>
-              </label>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <ExportQcReportPreview inspection={inspection} />
+
+      <ReviewerChecklistPanel
+        inspectionId={inspectionId}
+        completed={inspection.checklistCompleted}
+      />
     </div>
   );
 }

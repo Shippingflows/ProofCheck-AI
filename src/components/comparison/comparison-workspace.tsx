@@ -5,14 +5,17 @@ import { ShieldAlert } from "lucide-react";
 import { DocumentPanel, type FindingMarker } from "./document-panel";
 import { ViewerControls } from "./viewer-controls";
 import { FindingsSidebar, type ReviewAction } from "./findings-sidebar";
+import { FindingDetailPanel } from "./finding-detail-panel";
+import { InspectionProfileCard } from "@/components/shared/inspection-profile-card";
+import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
+import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-reviews";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { EvidenceRegion } from "@/domain/models";
 import {
   ProcessingState,
   ErrorState,
 } from "@/components/shared/state-views";
-import { DemoBadge } from "@/components/shared/demo-badge";
-import { isDemoInspection, getDemoDocuments } from "@/lib/demo";
+import { getDemoDocuments } from "@/lib/demo";
 
 interface ComparisonWorkspaceProps {
   inspectionId: string;
@@ -87,7 +90,7 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
     setNoteText("");
   }, []);
 
-  const selectedFinding = findings.find((f) => f.id === selectedFindingId);
+  const selectedFinding = findings.find((f) => f.id === selectedFindingId) ?? null;
   const highlightRegion: EvidenceRegion | null =
     selectedFinding?.evidenceRegion ?? null;
 
@@ -137,34 +140,33 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
 
   return (
     <div className="flex h-full flex-col">
-      {/* AI-assisted label */}
       <div className="flex items-center justify-between border-b border-border bg-card px-4 py-2">
         <div className="flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium text-muted-foreground">
             AI-assisted review. Human confirmation required.
           </span>
-          {isDemoInspection(inspectionId) && <DemoBadge />}
         </div>
-        <div className="flex items-center gap-4">
-          <ViewerControls
-            zoom={zoom}
-            onZoomIn={() => setZoom((z) => Math.min(200, z + 25))}
-            onZoomOut={() => setZoom((z) => Math.max(50, z - 25))}
-            syncScroll={syncScroll}
-            onToggleSyncScroll={() => setSyncScroll(!syncScroll)}
-            overlayVisible={overlayVisible}
-            onToggleOverlay={() => setOverlayVisible(!overlayVisible)}
-            currentPage={currentPage}
-            totalPages={demoDocuments ? 1 : 4}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        <ViewerControls
+          zoom={zoom}
+          onZoomIn={() => setZoom((z) => Math.min(200, z + 25))}
+          onZoomOut={() => setZoom((z) => Math.max(50, z - 25))}
+          syncScroll={syncScroll}
+          onToggleSyncScroll={() => setSyncScroll(!syncScroll)}
+          overlayVisible={overlayVisible}
+          onToggleOverlay={() => setOverlayVisible(!overlayVisible)}
+          currentPage={currentPage}
+          totalPages={demoDocuments ? 1 : 4}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
-      {/* Main content */}
+      <div className="grid shrink-0 grid-cols-[1fr_280px] gap-3 border-b border-border bg-muted/20 p-3">
+        <InspectionProfileCard profileRef={inspection.profileRef} compact />
+        <WhatProofCheckReviews />
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Document panels */}
         <div className="flex flex-1 gap-3 p-3">
           <DocumentPanel
             title="Approved Master"
@@ -192,7 +194,17 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
           />
         </div>
 
-        {/* Findings sidebar */}
+        <FindingDetailPanel
+          finding={selectedFinding}
+          reviewerAction={selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null}
+          onAction={(action) => {
+            if (selectedFindingId) handleAction(selectedFindingId, action);
+          }}
+          onAddNote={() => {
+            if (selectedFindingId) handleAddNote(selectedFindingId);
+          }}
+        />
+
         <FindingsSidebar
           findings={findings}
           selectedFindingId={selectedFindingId}
@@ -203,7 +215,13 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
         />
       </div>
 
-      {/* Note dialog */}
+      <div className="shrink-0 border-t border-border p-3">
+        <ReviewerChecklistPanel
+          inspectionId={inspectionId}
+          completed={inspection.checklistCompleted}
+        />
+      </div>
+
       {noteDialogFindingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-lg">

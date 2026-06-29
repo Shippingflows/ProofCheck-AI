@@ -1,5 +1,6 @@
 import { Finding, FindingsSummary } from "@/domain/models";
 import { FindingSeverity } from "@/domain/enums";
+import { RECOMMENDATION_REJECT } from "@/lib/recommendations";
 import {
   ComparisonEngine,
   ExtractedText,
@@ -86,7 +87,7 @@ export class DeterministicEngine implements ComparisonEngine {
 
     let recommendation: string;
     if (critical > 0) {
-      recommendation = "Reject — Supplier Correction Required";
+      recommendation = RECOMMENDATION_REJECT;
     } else if (major > 0) {
       recommendation = "Review Required — Major differences detected";
     } else if (minor > 0) {
