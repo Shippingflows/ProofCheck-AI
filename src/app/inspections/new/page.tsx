@@ -9,10 +9,11 @@ export default function NewInspectionPage() {
       <div className="mx-auto max-w-4xl space-y-6">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
-            New Inspection
+            New Supplier Proof Review
           </h2>
           <p className="text-sm text-muted-foreground">
-            Upload files and configure a new supplier proof comparison.
+            Capture procurement intake details and configure a governed supplier
+            proof comparison.
           </p>
         </div>
 

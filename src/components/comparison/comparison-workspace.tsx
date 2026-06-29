@@ -5,6 +5,8 @@ import { CockpitRecordHeader } from "@/components/cockpit/cockpit-record-header"
 import { CockpitInspectionContext } from "@/components/cockpit/cockpit-inspection-context";
 import { CockpitDocumentViewer } from "@/components/cockpit/cockpit-document-viewer";
 import { CockpitFindingsRegister } from "@/components/cockpit/cockpit-findings-register";
+import { CockpitReleaseBlockedBanner } from "@/components/cockpit/cockpit-release-blocked-banner";
+import { CockpitFindingActionPanel } from "@/components/cockpit/cockpit-finding-action-panel";
 import { CockpitFooter } from "@/components/cockpit/cockpit-footer";
 import type { ReviewAction } from "@/components/comparison/findings-sidebar";
 import type { FindingMarker } from "@/components/comparison/document-panel";
@@ -67,6 +69,9 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
   const selectedFinding = findings.find((f) => f.id === selectedFindingId) ?? null;
   const demoDocuments = getDemoDocuments(inspectionId);
   const findingNumberMap = new Map(findings.map((f, i) => [f.id, i + 1]));
+  const selectedFindingLabel = selectedFindingId
+    ? `F-${String(findingNumberMap.get(selectedFindingId) ?? 0).padStart(3, "0")}`
+    : null;
   const markers: FindingMarker[] = findings
     .filter((f) => f.evidenceRegion !== null)
     .map((f) => ({
@@ -115,6 +120,8 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
     <div className="min-h-0 flex-1 overflow-auto p-4">
       <CockpitRecordHeader inspection={inspection} />
 
+      <CockpitReleaseBlockedBanner findings={findings} />
+
       <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[330px_minmax(0,1fr)_390px]">
         <CockpitInspectionContext inspection={inspection} />
 
@@ -133,18 +140,23 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
           findings={findings}
           selectedFindingId={selectedFindingId}
           findingNumberMap={findingNumberMap}
-          reviewerAction={
-            selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null
-          }
           onSelectFinding={setSelectedFindingId}
-          onAction={(action) => {
-            if (selectedFindingId) handleAction(selectedFindingId, action);
-          }}
-          onAddNote={() => {
-            if (selectedFindingId) handleAddNote(selectedFindingId);
-          }}
         />
       </div>
+
+      <CockpitFindingActionPanel
+        finding={selectedFinding}
+        findingLabel={selectedFindingLabel}
+        reviewerAction={
+          selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null
+        }
+        onAction={(action) => {
+          if (selectedFindingId) handleAction(selectedFindingId, action);
+        }}
+        onAddNote={() => {
+          if (selectedFindingId) handleAddNote(selectedFindingId);
+        }}
+      />
 
       <CockpitFooter findings={findings} />
 

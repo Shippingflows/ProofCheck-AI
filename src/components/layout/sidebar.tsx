@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const mainNav = [
   { name: "Dashboard", href: "/dashboard" },
-  { name: "New Inspection", href: "/inspections/new" },
+  { name: "New Supplier Proof Review", href: "/inspections/new" },
   { name: "Comparison Workspace", href: "/comparison" },
   { name: "Findings Register", href: "/report" },
   { name: "Supplier Corrections", href: "/correction" },

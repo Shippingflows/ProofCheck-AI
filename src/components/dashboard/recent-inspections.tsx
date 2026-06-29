@@ -75,7 +75,7 @@ export function RecentInspections() {
           className="h-7 rounded-[3px] px-3 text-xs"
           onClick={() => router.push("/inspections/new")}
         >
-          + New Inspection
+          + New Proof Review
         </Button>
       </div>
       <CardContent className="px-0 pb-0">
@@ -92,7 +92,7 @@ export function RecentInspections() {
               title="No inspections yet"
               description="Create your first inspection to compare an approved master against a supplier proof."
               action={{
-                label: "New Inspection",
+                label: "New Supplier Proof Review",
                 onClick: () => router.push("/inspections/new"),
               }}
             />

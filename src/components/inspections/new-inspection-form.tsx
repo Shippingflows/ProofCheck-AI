@@ -31,6 +31,11 @@ interface FormInput {
   title: string;
   supplierName: string;
   productName: string;
+  purchaseOrderNumber: string;
+  supplierId: string;
+  requestedBy: string;
+  reviewDueDate: string;
+  manufacturingSite: string;
   masterFile: File | null;
   supplierFile: File | null;
   profileId: string;
@@ -57,6 +62,11 @@ export function NewInspectionForm() {
       title: "",
       supplierName: "",
       productName: "",
+      purchaseOrderNumber: "",
+      supplierId: "",
+      requestedBy: "",
+      reviewDueDate: "",
+      manufacturingSite: "",
       masterFile: null,
       supplierFile: null,
       profileId: "",
@@ -135,6 +145,11 @@ export function NewInspectionForm() {
       title: DEMO_FORM_TITLE,
       supplierName: "Pacific Print Solutions",
       productName: "BioTouch Sample Collection Kit",
+      purchaseOrderNumber: "PO-2026-04182",
+      supplierId: "SUP-1047",
+      requestedBy: "Marcus Webb · Procurement",
+      reviewDueDate: "2026-01-22",
+      manufacturingSite: "Irvine, CA · Plant 3",
       masterFile: demoFile,
       supplierFile: supplierFile,
       profileId: "profile_medical_device_01",
@@ -192,10 +207,93 @@ export function NewInspectionForm() {
         </CardContent>
       </Card>
 
+      {/* Procurement intake */}
+      <Card className="border border-border shadow-none">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Procurement &amp; Intake</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="purchaseOrderNumber">Purchase Order</Label>
+              <Input
+                id="purchaseOrderNumber"
+                placeholder="e.g. PO-2026-04182"
+                className="font-mono text-sm"
+                {...register("purchaseOrderNumber")}
+                aria-invalid={!!errors.purchaseOrderNumber}
+              />
+              {errors.purchaseOrderNumber && (
+                <p className="text-xs text-destructive">
+                  {errors.purchaseOrderNumber.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="supplierId">Supplier ID</Label>
+              <Input
+                id="supplierId"
+                placeholder="e.g. SUP-1047"
+                className="font-mono text-sm"
+                {...register("supplierId")}
+                aria-invalid={!!errors.supplierId}
+              />
+              {errors.supplierId && (
+                <p className="text-xs text-destructive">{errors.supplierId.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="requestedBy">Requested By</Label>
+              <Input
+                id="requestedBy"
+                placeholder="e.g. Marcus Webb · Procurement"
+                {...register("requestedBy")}
+                aria-invalid={!!errors.requestedBy}
+              />
+              {errors.requestedBy && (
+                <p className="text-xs text-destructive">{errors.requestedBy.message}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="reviewDueDate">Review Due Date</Label>
+              <Input
+                id="reviewDueDate"
+                type="date"
+                {...register("reviewDueDate")}
+                aria-invalid={!!errors.reviewDueDate}
+              />
+              {errors.reviewDueDate && (
+                <p className="text-xs text-destructive">
+                  {errors.reviewDueDate.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="manufacturingSite">Manufacturing Site / Plant</Label>
+            <Input
+              id="manufacturingSite"
+              placeholder="e.g. Irvine, CA · Plant 3"
+              {...register("manufacturingSite")}
+              aria-invalid={!!errors.manufacturingSite}
+            />
+            {errors.manufacturingSite && (
+              <p className="text-xs text-destructive">
+                {errors.manufacturingSite.message}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Basic Information */}
       <Card className="border border-border shadow-none">
         <CardHeader className="pb-4">
-          <CardTitle className="text-base">Inspection Details</CardTitle>
+          <CardTitle className="text-base">Proof Review Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
@@ -460,7 +558,7 @@ export function NewInspectionForm() {
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isSubmitting ? "Starting Comparison..." : "Start Comparison"}
+          {isSubmitting ? "Starting Comparison..." : "Start Supplier Proof Review"}
         </Button>
       </div>
     </form>

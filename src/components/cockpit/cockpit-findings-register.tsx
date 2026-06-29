@@ -7,7 +7,6 @@ import { FindingSeverity, FindingCategory } from "@/domain/enums";
 import { cn } from "@/lib/utils";
 import { confidencePercent } from "@/lib/findings";
 import { getDifferenceNote } from "@/lib/finding-difference";
-import type { ReviewAction } from "@/components/comparison/findings-sidebar";
 
 const categoryLabels: Record<FindingCategory, string> = {
   [FindingCategory.TextContent]: "Text",
@@ -38,20 +37,14 @@ interface CockpitFindingsRegisterProps {
   findings: Finding[];
   selectedFindingId: string | null;
   findingNumberMap: Map<string, number>;
-  reviewerAction: ReviewAction;
   onSelectFinding: (id: string) => void;
-  onAction: (action: ReviewAction) => void;
-  onAddNote: () => void;
 }
 
 export function CockpitFindingsRegister({
   findings,
   selectedFindingId,
   findingNumberMap,
-  reviewerAction,
   onSelectFinding,
-  onAction,
-  onAddNote,
 }: CockpitFindingsRegisterProps) {
   const [filter, setFilter] = useState<FilterMode>("all");
   const selected = findings.find((f) => f.id === selectedFindingId) ?? null;
@@ -65,8 +58,6 @@ export function CockpitFindingsRegister({
   const filtered =
     filter === "all" ? findings : findings.filter((f) => f.severity === filter);
 
-  const confirmed = reviewerAction === "accepted";
-  const dismissed = reviewerAction === "dismissed";
   const selectedNum = selectedFindingId
     ? findingNumberMap.get(selectedFindingId) ?? 0
     : 0;
@@ -192,29 +183,6 @@ export function CockpitFindingsRegister({
                   : selected.severity === FindingSeverity.Critical
                     ? "Critical because this difference may affect regulatory compliance, traceability, or patient safety."
                     : "Minor finding — reviewer confirmation recommended before disposition."}
-              </div>
-
-              <div className="mt-2.5 grid gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => onAction(confirmed ? null : "accepted")}
-                  className={cn(
-                    "cockpit-btn",
-                    confirmed ? "cockpit-btn-primary" : "cockpit-btn-primary"
-                  )}
-                >
-                  {confirmed ? "✓ Finding Confirmed" : "Confirm Finding"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAction(dismissed ? null : "dismissed")}
-                  className="cockpit-btn cockpit-btn-warn"
-                >
-                  {dismissed ? "Dismissed with reason" : "Dismiss with required reason"}
-                </button>
-                <button type="button" onClick={onAddNote} className="cockpit-btn">
-                  Add reviewer note
-                </button>
               </div>
             </div>
 

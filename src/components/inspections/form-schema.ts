@@ -33,6 +33,11 @@ export const inspectionFormSchema = z.object({
   supplierFile: validatedFile("Supplier production file is required"),
   profileId: z.string().min(1, "Inspection profile is required"),
   checklistIds: z.array(z.string()).min(1, "Select at least one checklist item"),
+  purchaseOrderNumber: z.string().min(1, "Purchase order is required"),
+  supplierId: z.string().min(1, "Supplier ID is required"),
+  requestedBy: z.string().min(2, "Requester name is required"),
+  reviewDueDate: z.string().min(1, "Review due date is required"),
+  manufacturingSite: z.string().min(1, "Manufacturing site is required"),
   criticalFields: z.string().optional(),
   reviewerName: z.string().min(1, "Reviewer assignment is required"),
   varianceSensitivity: z.enum(["strict", "standard", "visual_review"], {
