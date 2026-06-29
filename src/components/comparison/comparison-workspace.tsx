@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { ShieldAlert } from "lucide-react";
+import { PanelRight } from "lucide-react";
 import { DocumentPanel, type FindingMarker } from "./document-panel";
-import { ViewerControls } from "./viewer-controls";
 import { FindingsSidebar, type ReviewAction } from "./findings-sidebar";
 import { FindingDetailPanel } from "./finding-detail-panel";
 import { InspectionSummaryBar } from "./inspection-summary-bar";
-import { OtherFindingsBanner } from "./other-findings-banner";
-import { ComparisonChecklistDrawer } from "./comparison-checklist-drawer";
+import { ComparisonStatusBar } from "./comparison-status-bar";
+import { ComparisonChecklistFooter } from "./comparison-checklist-footer";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { EvidenceRegion } from "@/domain/models";
 import { FindingSeverity } from "@/domain/enums";
@@ -18,6 +17,7 @@ import {
 } from "@/components/shared/state-views";
 import { getDemoDocuments } from "@/lib/demo";
 import { DEMO_DEFAULT_FINDING_ID } from "@/data/seed";
+import { Button } from "@/components/ui/button";
 
 function getHighlightLabel(finding: { id: string; severity: FindingSeverity; title: string }): string {
   const sev =
@@ -59,6 +59,7 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
   >({});
   const [noteDialogFindingId, setNoteDialogFindingId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
+  const [detailPanelOpen, setDetailPanelOpen] = useState(true);
 
   const masterScrollRef = useRef<HTMLDivElement | null>(null);
   const supplierScrollRef = useRef<HTMLDivElement | null>(null);
@@ -106,11 +107,19 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
     setNoteText("");
   }, []);
 
-  // Ensure demo opens with the revision mismatch preselected once findings load
+  const handleSelectFinding = useCallback((id: string | null) => {
+    setSelectedFindingId(id);
+    if (id) setDetailPanelOpen(true);
+  }, []);
+
+  // Ensure demo opens with the revision mismatch preselected once findings load.
+  // Deferring to an effect so the initial selection resets correctly after a
+  // demo data reset without creating a derived-state anti-pattern.
   useEffect(() => {
     if (findings.length === 0) return;
     const defaultFinding = findings.find((f) => f.id === DEMO_DEFAULT_FINDING_ID);
     if (defaultFinding && !findings.some((f) => f.id === selectedFindingId)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedFindingId(DEMO_DEFAULT_FINDING_ID);
     }
   }, [findings, selectedFindingId]);
@@ -166,34 +175,22 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-border bg-card px-4 py-2">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium text-muted-foreground">
-            AI-assisted review. Human confirmation required.
-          </span>
-        </div>
-        <ViewerControls
-          zoom={zoom}
-          onZoomIn={() => setZoom((z) => Math.min(200, z + 25))}
-          onZoomOut={() => setZoom((z) => Math.max(50, z - 25))}
-          syncScroll={syncScroll}
-          onToggleSyncScroll={() => setSyncScroll(!syncScroll)}
-          overlayVisible={overlayVisible}
-          onToggleOverlay={() => setOverlayVisible(!overlayVisible)}
-          currentPage={currentPage}
-          totalPages={demoDocuments ? 1 : 4}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+    <div className="flex h-full flex-col bg-canvas">
+      <ComparisonStatusBar
+        findings={findings}
+        zoom={zoom}
+        onZoomIn={() => setZoom((z) => Math.min(200, z + 25))}
+        onZoomOut={() => setZoom((z) => Math.max(50, z - 25))}
+        syncScroll={syncScroll}
+        onToggleSyncScroll={() => setSyncScroll(!syncScroll)}
+        overlayVisible={overlayVisible}
+        onToggleOverlay={() => setOverlayVisible(!overlayVisible)}
+        currentPage={currentPage}
+        totalPages={demoDocuments ? 1 : 4}
+        onPageChange={setCurrentPage}
+      />
 
       <InspectionSummaryBar inspection={inspection} />
-
-      <OtherFindingsBanner
-        findings={findings}
-        selectedFindingId={selectedFindingId}
-      />
 
       <div className="flex min-w-0 flex-1 overflow-hidden">
         <div className="flex min-w-0 flex-1 gap-2 p-2">
@@ -232,32 +229,49 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
         <FindingsSidebar
           findings={findings}
           selectedFindingId={selectedFindingId}
-          onSelectFinding={setSelectedFindingId}
+          onSelectFinding={handleSelectFinding}
           reviewerActions={reviewerActions}
           onAction={handleAction}
           onAddNote={handleAddNote}
         />
 
-        <FindingDetailPanel
-          finding={selectedFinding}
-          reviewerAction={selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null}
-          onAction={(action) => {
-            if (selectedFindingId) handleAction(selectedFindingId, action);
-          }}
-          onAddNote={() => {
-            if (selectedFindingId) handleAddNote(selectedFindingId);
-          }}
-        />
+        {detailPanelOpen && (
+          <FindingDetailPanel
+            finding={selectedFinding}
+            reviewerAction={selectedFindingId ? reviewerActions[selectedFindingId] ?? null : null}
+            onAction={(action) => {
+              if (selectedFindingId) handleAction(selectedFindingId, action);
+            }}
+            onAddNote={() => {
+              if (selectedFindingId) handleAddNote(selectedFindingId);
+            }}
+            onClose={() => setDetailPanelOpen(false)}
+          />
+        )}
+
+        {!detailPanelOpen && (
+          <div className="flex w-10 shrink-0 flex-col items-center border-l border-border bg-card py-2">
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => setDetailPanelOpen(true)}
+              title="Show detail panel"
+              aria-label="Show detail panel"
+            >
+              <PanelRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      <ComparisonChecklistDrawer
+      <ComparisonChecklistFooter
         inspectionId={inspectionId}
         completed={inspection.checklistCompleted}
       />
 
       {noteDialogFindingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-md rounded border border-border bg-card p-6 shadow-xl">
             <h4 className="text-sm font-semibold text-foreground">
               Add Reviewer Note
             </h4>

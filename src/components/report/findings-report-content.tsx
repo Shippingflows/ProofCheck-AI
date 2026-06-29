@@ -274,8 +274,8 @@ export function FindingsReportContent({
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-0 pb-0">
-            <Table>
+          <CardContent className="overflow-x-auto px-0 pb-0">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-[110px] pl-6">

@@ -1,16 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  AlertTriangle,
-  AlertCircle,
-  Info,
-  CheckCircle2,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Finding } from "@/domain/models";
 import { FindingSeverity, FindingCategory } from "@/domain/enums";
 import { cn } from "@/lib/utils";
-import { isPotentialMismatch } from "@/lib/findings";
 
 interface FindingsSidebarProps {
   findings: Finding[];
@@ -23,30 +17,21 @@ interface FindingsSidebarProps {
 
 export type ReviewAction = "accepted" | "dismissed" | "correction" | null;
 
-const severityConfig = {
+const severityStyles = {
   [FindingSeverity.Critical]: {
-    icon: AlertCircle,
+    dot: "bg-[#dc2626]",
+    badge: "bg-[#fee2e2] text-[#991b1b]",
     label: "Critical",
-    color: "text-red-600",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
-    badgeClass: "bg-red-100 text-red-700 border-red-200",
   },
   [FindingSeverity.Major]: {
-    icon: AlertTriangle,
+    dot: "bg-[#f97316]",
+    badge: "bg-[#ffedd5] text-[#9a3412]",
     label: "Major",
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-200",
-    badgeClass: "bg-amber-100 text-amber-700 border-amber-200",
   },
   [FindingSeverity.Minor]: {
-    icon: Info,
+    dot: "bg-[#64748b]",
+    badge: "bg-[#f1f5f9] text-[#334155]",
     label: "Minor",
-    color: "text-slate-500",
-    bgColor: "bg-slate-50",
-    borderColor: "border-slate-200",
-    badgeClass: "bg-slate-100 text-slate-600 border-slate-200",
   },
 };
 
@@ -61,7 +46,7 @@ const categoryLabels: Record<FindingCategory, string> = {
   [FindingCategory.MissingElement]: "Missing",
 };
 
-type FilterMode = "all" | FindingSeverity | FindingCategory;
+type FilterMode = "all" | FindingSeverity;
 
 export function FindingsSidebar({
   findings,
@@ -73,10 +58,7 @@ export function FindingsSidebar({
 
   const filteredFindings = findings.filter((f) => {
     if (filter === "all") return true;
-    if (Object.values(FindingSeverity).includes(filter as FindingSeverity)) {
-      return f.severity === filter;
-    }
-    return f.category === filter;
+    return f.severity === filter;
   });
 
   const counts = {
@@ -86,95 +68,64 @@ export function FindingsSidebar({
   };
 
   return (
-    <div className="flex h-full w-60 min-w-[240px] shrink-0 flex-col border-l border-border bg-card">
-      {/* Header */}
-      <div className="border-b border-border px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground">Findings</h3>
-          <span className="text-xs text-muted-foreground">
+    <div className="flex h-full w-[210px] min-w-[210px] shrink-0 flex-col overflow-hidden border-l border-border bg-card">
+      <div className="shrink-0 border-b border-border px-3 py-2.5">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-foreground">Findings</h3>
+          <span className="text-[11px] text-muted-foreground">
             {findings.length} items
           </span>
         </div>
 
-        {/* Severity counts */}
-        <div className="mt-2 flex gap-1.5">
-          <button
+        <div className="flex flex-wrap gap-0.5">
+          <FilterPill
+            active={filter === "all"}
             onClick={() => setFilter("all")}
-            className={cn(
-              "rounded px-2 py-0.5 text-xs font-medium transition-colors",
-              filter === "all"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted"
-            )}
+            className={filter === "all" ? "bg-primary text-primary-foreground" : ""}
           >
             All ({findings.length})
-          </button>
-          <button
+          </FilterPill>
+          <FilterPill
+            active={filter === FindingSeverity.Critical}
             onClick={() => setFilter(FindingSeverity.Critical)}
-            className={cn(
-              "rounded px-2 py-0.5 text-xs font-medium transition-colors",
+            className={
               filter === FindingSeverity.Critical
-                ? "bg-red-100 text-red-700"
-                : "text-muted-foreground hover:bg-muted"
-            )}
+                ? "bg-[#fee2e2] font-bold text-[#991b1b]"
+                : ""
+            }
           >
             {counts.critical} Critical
-          </button>
-          <button
+          </FilterPill>
+          <FilterPill
+            active={filter === FindingSeverity.Major}
             onClick={() => setFilter(FindingSeverity.Major)}
-            className={cn(
-              "rounded px-2 py-0.5 text-xs font-medium transition-colors",
+            className={
               filter === FindingSeverity.Major
-                ? "bg-amber-100 text-amber-700"
-                : "text-muted-foreground hover:bg-muted"
-            )}
+                ? "bg-[#ffedd5] font-bold text-[#9a3412]"
+                : ""
+            }
           >
             {counts.major} Major
-          </button>
-          <button
+          </FilterPill>
+          <FilterPill
+            active={filter === FindingSeverity.Minor}
             onClick={() => setFilter(FindingSeverity.Minor)}
-            className={cn(
-              "rounded px-2 py-0.5 text-xs font-medium transition-colors",
+            className={
               filter === FindingSeverity.Minor
-                ? "bg-slate-200 text-slate-700"
-                : "text-muted-foreground hover:bg-muted"
-            )}
+                ? "bg-[#f1f5f9] font-semibold text-[#334155]"
+                : ""
+            }
           >
             {counts.minor} Minor
-          </button>
-        </div>
-
-        {/* Category filter */}
-        <div className="mt-2 flex flex-wrap gap-1">
-          {Object.entries(categoryLabels).map(([cat, label]) => {
-            const count = findings.filter((f) => f.category === cat).length;
-            if (count === 0) return null;
-            return (
-              <button
-                key={cat}
-                onClick={() =>
-                  setFilter(filter === cat ? "all" : (cat as FilterMode))
-                }
-                className={cn(
-                  "rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors",
-                  filter === cat
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
+          </FilterPill>
         </div>
       </div>
 
-      {/* Findings list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {findings.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+          <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f0fdf4]">
+              <CheckCircle2 className="h-5 w-5 text-[#166534]" />
             </div>
             <p className="text-sm font-medium text-foreground">
               No significant differences found
@@ -184,76 +135,85 @@ export function FindingsSidebar({
               should still confirm before approval.
             </p>
           </div>
+        ) : filteredFindings.length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              No findings match this filter.
+            </p>
+          </div>
         ) : (
-          filteredFindings.length === 0 && (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                No findings match this filter.
-              </p>
-            </div>
-          )
-        )}
-        {filteredFindings.map((finding) => {
-          const config = severityConfig[finding.severity];
-          const Icon = config.icon;
-          const isSelected = selectedFindingId === finding.id;
-          const action = reviewerActions[finding.id] ?? null;
+          filteredFindings.map((finding) => {
+            const sev = severityStyles[finding.severity];
+            const isSelected = selectedFindingId === finding.id;
+            const action = reviewerActions[finding.id] ?? null;
 
-          return (
-            <div
-              key={finding.id}
-              className={cn(
-                "border-b border-border transition-colors",
-                isSelected && "bg-primary/5"
-              )}
-            >
+            return (
               <button
-                onClick={() =>
-                  onSelectFinding(isSelected ? null : finding.id)
-                }
-                className="flex w-full items-start gap-2.5 px-4 py-3 text-left hover:bg-accent/50"
+                key={finding.id}
+                type="button"
+                onClick={() => onSelectFinding(isSelected ? null : finding.id)}
+                className={cn(
+                  "flex w-full items-start gap-1.5 border-b border-[#f0eee9] px-3 py-2.5 text-left transition-colors hover:bg-secondary",
+                  isSelected && "border-l-[3px] border-l-[#2d6be4] bg-[#eef4ff] pl-[calc(0.75rem-3px)]"
+                )}
               >
-                <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", config.color)} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {finding.title}
+                <span
+                  className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", sev.dot)}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="break-words text-[11.5px] font-medium leading-snug text-foreground">
+                    {finding.title}
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                    <span
+                      className={cn(
+                        "rounded-[2px] px-1 py-px text-[9.5px] font-semibold",
+                        sev.badge
+                      )}
+                    >
+                      {sev.label}
                     </span>
-                    {action && <ActionBadge action={action} />}
+                    <span className="text-[10px] text-[#9ca3af]">
+                      {categoryLabels[finding.category]}
+                    </span>
                   </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{categoryLabels[finding.category]}</span>
-                    <span>·</span>
-                    <span>Page {finding.pageNumber}</span>
-                  </div>
-                  {isPotentialMismatch(finding) && (
-                    <span className="mt-1 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                      Potential mismatch
+                  {action && (
+                    <span className="mt-1 inline-block rounded-[2px] bg-[#f0fdf4] px-1 py-px text-[9px] font-semibold text-[#166534]">
+                      {action === "accepted" ? "Confirmed" : "Dismissed"}
                     </span>
                   )}
                 </div>
               </button>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );
 }
 
-function ActionBadge({ action }: { action: ReviewAction }) {
-  if (!action) return null;
-
-  const config = {
-    accepted: { label: "Accepted", className: "bg-amber-100 text-amber-700" },
-    dismissed: { label: "Dismissed", className: "bg-slate-100 text-slate-600" },
-    correction: { label: "Correction", className: "bg-red-100 text-red-700" },
-  };
-
-  const c = config[action];
+function FilterPill({
+  active,
+  onClick,
+  className,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", c.className)}>
-      {c.label}
-    </span>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-[3px] px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent",
+        active && "font-bold",
+        className
+      )}
+    >
+      {children}
+    </button>
   );
 }

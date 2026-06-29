@@ -10,10 +10,10 @@ import { WhatProofCheckReviews } from "@/components/shared/what-proofcheck-revie
 export default function DashboardPage() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto max-w-[1100px] space-y-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-muted-foreground">
             Overview of supplier proof inspections and review activity.
           </p>
         </div>
@@ -22,11 +22,11 @@ export default function DashboardPage() {
 
         <StatsCards />
 
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2">
             <RecentInspections />
           </div>
-          <div className="col-span-1 space-y-4">
+          <div className="space-y-4">
             <WhatProofCheckReviews />
             <ActivityFeed />
           </div>

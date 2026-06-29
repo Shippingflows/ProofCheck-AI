@@ -94,7 +94,7 @@ export function OnboardingPanel() {
           </p>
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {STEPS.map((step, idx) => (
             <div key={step.title} className="relative">
               <div className="flex h-full flex-col gap-2 rounded-md border border-border bg-card p-3">

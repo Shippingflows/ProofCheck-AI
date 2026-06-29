@@ -194,7 +194,7 @@ export function CorrectionRequestContent({
 
       {/* Inspection details */}
       <Card className="border border-border shadow-none">
-        <CardContent className="grid grid-cols-3 gap-4 p-5">
+        <CardContent className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-3">
           <div>
             <p className="text-xs text-muted-foreground">Supplier</p>
             <p className="text-sm font-medium text-foreground">
@@ -216,9 +216,9 @@ export function CorrectionRequestContent({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Finding selection */}
-        <div className="col-span-1 space-y-3">
+        <div className="space-y-3">
           <Card className="border border-border shadow-none">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">
@@ -280,7 +280,7 @@ export function CorrectionRequestContent({
         </div>
 
         {/* Email draft */}
-        <div className="col-span-2 flex min-h-0 flex-col">
+        <div className="flex min-h-0 flex-col lg:col-span-2">
           <Card className="flex min-h-0 flex-1 flex-col border border-border shadow-none">
             <CardHeader className="shrink-0 pb-2">
               <CardTitle className="text-sm">Correction Request Draft</CardTitle>
@@ -375,7 +375,7 @@ export function CorrectionRequestContent({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-60 right-0 z-30 border-t border-border bg-card/95 px-6 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <div className="fixed bottom-0 left-[216px] right-0 z-30 border-t border-border bg-card/95 px-6 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             Actions apply to the draft above — nothing is sent automatically.

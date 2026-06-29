@@ -59,25 +59,33 @@ export function DocumentPanel({
   const isMaster = label === "master";
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
-      <div className="flex h-9 items-center justify-between border-b border-border px-3">
-        <span className="text-xs font-medium text-foreground">{title}</span>
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded border border-border bg-panel">
+      <div className="flex h-[30px] shrink-0 items-center gap-1.5 border-b border-border bg-canvas px-3">
         <span
           className={cn(
-            "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-            isMaster
-              ? "bg-emerald-50 text-emerald-700"
-              : "bg-red-50 text-red-700"
+            "h-1.5 w-1.5 shrink-0 rounded-full",
+            isMaster ? "bg-[#166534]" : "bg-[#dc2626]"
+          )}
+        />
+        <span
+          className={cn(
+            "text-[9.5px] font-bold uppercase tracking-[0.08em]",
+            isMaster ? "text-[#166534]" : "text-[#b91c1c]"
           )}
         >
-          {isMaster ? "Approved" : "Supplier"}
+          {isMaster ? "Approved Master" : "Supplier Proof"}
+        </span>
+        <span className="ml-auto max-w-[160px] truncate font-mono text-[9.5px] text-[#9ca3af]">
+          {isMaster
+            ? "bt-sck-240-rev04-approved.pdf"
+            : "bt-sck-240-supplier-proof-v1.pdf"}
         </span>
       </div>
 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="relative flex-1 overflow-auto bg-slate-100 p-4"
+        className="relative flex-1 overflow-auto bg-panel p-3"
       >
         <div
           className="relative mx-auto bg-white shadow-sm transition-transform"

@@ -14,6 +14,7 @@ import {
   Send,
   Plus,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 function actionIcon(action: AuditAction) {
   switch (action) {
@@ -102,7 +103,7 @@ export function ActivityFeed() {
                     <div className="w-px flex-1 bg-border" />
                   )}
                 </div>
-                <div className={`pb-4 ${isLast ? "pb-0" : ""}`}>
+                <div className={cn("pb-4", isLast && "pb-0")}>
                   <p className="text-sm font-medium text-foreground">
                     {actionLabel(event.action)}
                   </p>

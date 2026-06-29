@@ -93,7 +93,7 @@ export function AuditPageContent({ inspectionId }: AuditPageContentProps) {
       <CorrectionStatusTracker status={inspection.correctionStatus} />
 
       <Card className="border border-border shadow-none">
-        <CardContent className="grid grid-cols-4 gap-4 p-5">
+        <CardContent className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
           <div>
             <p className="text-xs text-muted-foreground">Inspection</p>
             <p className="text-sm font-medium text-foreground truncate">

@@ -23,6 +23,7 @@ interface ViewerControlsProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  compact?: boolean;
 }
 
 export function ViewerControls({
@@ -36,7 +37,32 @@ export function ViewerControls({
   currentPage,
   totalPages,
   onPageChange,
+  compact = false,
 }: ViewerControlsProps) {
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onToggleOverlay}
+          className={cn(
+            "rounded-[3px] border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent",
+            overlayVisible && "border-primary/30 bg-primary/5 text-primary"
+          )}
+        >
+          Overlay
+        </button>
+        <button
+          type="button"
+          onClick={() => onZoomIn()}
+          className="rounded-[3px] border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent"
+        >
+          Fit
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-1.5 py-1 shadow-sm">
       <Button

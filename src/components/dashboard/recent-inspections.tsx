@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -66,10 +67,17 @@ export function RecentInspections() {
   const router = useRouter();
 
   return (
-    <Card className="border border-border shadow-none">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">Recent Inspections</CardTitle>
-      </CardHeader>
+    <Card className="overflow-hidden rounded-[3px] border border-border shadow-none">
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <span className="text-[13px] font-semibold text-foreground">Recent Inspections</span>
+        <Button
+          size="sm"
+          className="h-7 rounded-[3px] px-3 text-xs"
+          onClick={() => router.push("/inspections/new")}
+        >
+          + New Inspection
+        </Button>
+      </div>
       <CardContent className="px-0 pb-0">
         {isLoading && <LoadingState label="Loading inspections…" />}
         {isError && (
@@ -91,28 +99,47 @@ export function RecentInspections() {
           </div>
         )}
         {!isLoading && !isError && inspections && inspections.length > 0 && (
-          <Table className="table-fixed">
+          <div className="overflow-x-auto">
+          <Table className="table-fixed min-w-[860px]">
             <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[24%] pl-6">Title</TableHead>
-                <TableHead className="w-[14%]">Supplier</TableHead>
-                <TableHead className="w-[9%]">SKU</TableHead>
-                <TableHead className="w-[7%]">Revision</TableHead>
-                <TableHead className="w-[11%]">Status</TableHead>
-                <TableHead className="w-[14%]">Findings</TableHead>
-                <TableHead className="w-[8%]">Due</TableHead>
-                <TableHead className="w-[8%]">Reviewer</TableHead>
-                <TableHead className="w-[5%] pr-6">Correction</TableHead>
+              <TableRow className="border-b border-border bg-secondary hover:bg-secondary">
+                <TableHead className="w-[24%] pl-5 text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Title
+                </TableHead>
+                <TableHead className="w-[14%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Supplier
+                </TableHead>
+                <TableHead className="w-[9%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  SKU
+                </TableHead>
+                <TableHead className="w-[7%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Revision
+                </TableHead>
+                <TableHead className="w-[11%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="w-[14%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Findings
+                </TableHead>
+                <TableHead className="w-[8%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Due
+                </TableHead>
+                <TableHead className="w-[8%] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Reviewer
+                </TableHead>
+                <TableHead className="w-[5%] pr-5 text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Correction
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {inspections.map((inspection) => (
                 <TableRow
                   key={inspection.id}
-                  className="cursor-pointer"
+                  className="cursor-pointer border-b border-[#f0eee9] hover:bg-secondary"
                   onClick={() => router.push(`/comparison/${inspection.id}`)}
                 >
-                  <TableCell className="max-w-0 pl-6 font-medium">
+                  <TableCell className="max-w-0 py-2.5 pl-5 font-medium">
                     <span
                       className="block truncate"
                       title={inspection.title}
@@ -154,7 +181,7 @@ export function RecentInspections() {
                   <TableCell className="max-w-0 text-sm text-muted-foreground">
                     <span className="block truncate">{inspection.reviewerName}</span>
                   </TableCell>
-                  <TableCell className="pr-6 text-xs text-muted-foreground">
+                  <TableCell className="pr-5 text-xs text-muted-foreground">
                     {inspection.correctionStatus === CorrectionStatus.NotStarted
                       ? "—"
                       : correctionStatusLabel(inspection.correctionStatus)}
@@ -163,6 +190,7 @@ export function RecentInspections() {
               ))}
             </TableBody>
           </Table>
+          </div>
         )}
       </CardContent>
     </Card>

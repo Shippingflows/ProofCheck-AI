@@ -178,7 +178,7 @@ export function ApprovalDecision({ inspectionId }: ApprovalDecisionProps) {
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label>Decision</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {DECISION_OPTIONS.map((opt) => {
                 const Icon = opt.icon;
                 const isActive = decision === opt.id;
