@@ -13,7 +13,7 @@ export default function ComparisonPage({
 
   return (
     <AppShell>
-      <div className="-m-7 flex h-[calc(100vh-52px)] flex-col sm:-mx-8">
+      <div className="-m-7 flex min-h-[calc(100vh-58px)] flex-col sm:-mx-8">
         <ComparisonWorkspace inspectionId={id} />
       </div>
     </AppShell>

@@ -375,7 +375,7 @@ export function CorrectionRequestContent({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-[216px] right-0 z-30 border-t border-border bg-card/95 px-6 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <div className="fixed bottom-0 left-[238px] right-0 z-30 border-t border-border bg-card/95 px-6 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             Actions apply to the draft above — nothing is sent automatically.

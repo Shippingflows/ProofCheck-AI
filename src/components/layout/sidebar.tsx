@@ -2,24 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Plus,
-  Columns2,
-  FileText,
-  Send,
-  ShieldCheck,
-  X,
-} from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "New Inspection", href: "/inspections/new", icon: Plus },
-  { name: "Comparison", href: "/comparison", icon: Columns2 },
-  { name: "Findings Report", href: "/report", icon: FileText },
-  { name: "Correction Request", href: "/correction", icon: Send },
-  { name: "Audit Trail", href: "/audit", icon: ShieldCheck },
+const mainNav = [
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "New Inspection", href: "/inspections/new" },
+  { name: "Comparison Workspace", href: "/comparison" },
+  { name: "Findings Register", href: "/report" },
+  { name: "Supplier Corrections", href: "/correction" },
+  { name: "Audit Trail", href: "/audit" },
+];
+
+const controlNav = [
+  { name: "QA Profiles", href: "/pilot-controls" },
+  { name: "Supplier Records", href: "/pilot-controls" },
+  { name: "Audit Exports", href: "/audit" },
 ];
 
 interface SidebarProps {
@@ -29,72 +27,68 @@ interface SidebarProps {
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
+
   return (
-    <aside className="flex h-full w-[216px] min-w-[216px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="flex h-[52px] items-center justify-between gap-2.5 border-b border-white/7 px-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-[#2d6be4]">
-            <ShieldCheck className="h-3.5 w-3.5 text-white" strokeWidth={2.2} />
-          </div>
-          <span className="text-[13px] font-semibold tracking-tight text-white">
-            ProofCheck AI
-          </span>
+    <aside className="flex h-full w-[238px] min-w-[238px] shrink-0 flex-col border-r border-[#111f33] bg-gradient-to-b from-[#07111f] to-[#050b14] px-3.5 py-[18px] text-[#d7dde8]">
+      <div className="mb-[26px] flex items-center gap-2.5">
+        <div className="grid h-[30px] w-[30px] place-items-center border border-[#28508a] bg-[#10233b] text-sm font-black text-[#93c5fd]">
+          ✓
         </div>
+        <span className="text-[15px] font-extrabold text-white">ProofCheck AI</span>
         {onClose && (
           <button
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="flex h-7 w-7 items-center justify-center rounded text-sidebar-foreground hover:bg-white/5 sm:hidden"
+            className="ml-auto flex h-7 w-7 items-center justify-center rounded text-[#a8b3c7] hover:bg-white/5 sm:hidden"
           >
             <X className="h-4 w-4" />
           </button>
         )}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-px p-2">
-        {navigation.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(item.href + "/");
-          const enabledRoutes = [
-            "/dashboard",
-            "/inspections/new",
-            "/comparison",
-            "/report",
-            "/correction",
-            "/audit",
-          ];
-          const isDisabled = !enabledRoutes.some(
-            (r) => item.href === r || item.href.startsWith(r)
-          );
-
+      <nav className="grid gap-1">
+        {mainNav.map((item) => {
+          const active = isActive(item.href);
           return (
             <Link
               key={item.name}
-              href={isDisabled ? "#" : item.href}
-              onClick={(e) => {
-                if (isDisabled) e.preventDefault();
-                else onClose?.();
-              }}
+              href={item.href}
+              onClick={() => onClose?.()}
               className={cn(
-                "flex items-center gap-2.5 rounded px-2.5 py-2 text-[12.5px] font-medium transition-colors",
-                isActive
-                  ? "border-l-2 border-[#4a7cf7] bg-sidebar-accent pl-[calc(0.625rem-2px)] text-white"
-                  : "border-l-2 border-transparent pl-2.5 text-[#8493a8] hover:bg-white/5 hover:text-[#c8d0dc]",
-                isDisabled && !isActive && "cursor-not-allowed opacity-50"
+                "rounded-[3px] px-[11px] py-2.5 text-[13px] font-semibold no-underline transition-colors",
+                active
+                  ? "bg-[#122846] text-white shadow-[inset_3px_0_0_#60a5fa]"
+                  : "text-[#a8b3c7] hover:bg-white/5 hover:text-white"
               )}
-              aria-disabled={isDisabled}
             >
-              <item.icon className="h-3.5 w-3.5 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
               {item.name}
             </Link>
           );
         })}
+
+        <div className="cockpit-label mx-[11px] mb-1.5 mt-[18px]">Controls</div>
+        {controlNav.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href}
+            onClick={() => onClose?.()}
+            className="rounded-[3px] px-[11px] py-2.5 text-[13px] font-semibold text-[#a8b3c7] no-underline hover:bg-white/5 hover:text-white"
+          >
+            {item.name}
+          </Link>
+        ))}
       </nav>
 
-      <div className="border-t border-white/6 px-4 py-3">
-        <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#3e4a5e]">
-          Pilot Workspace
+      <div className="mt-auto border-t border-[#152842] pt-3.5">
+        <p className="cockpit-tiny text-[#7f8da5]">
+          PILOT WORKSPACE
+          <br />
+          Synthetic medical-label sample
+          <br />
+          No autonomous disposition
         </p>
       </div>
     </aside>

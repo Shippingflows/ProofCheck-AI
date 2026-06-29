@@ -41,6 +41,12 @@
   --color-card: var(--card);
   --color-canvas: var(--canvas);
   --color-panel: var(--panel);
+  --color-cockpit-blue: var(--cockpit-blue);
+  --color-cockpit-crit: var(--cockpit-crit);
+  --color-cockpit-maj: var(--cockpit-maj);
+  --color-cockpit-minor: var(--cockpit-minor);
+  --color-cockpit-green: var(--cockpit-green);
+  --color-cockpit-amber: var(--cockpit-amber);
   --radius-sm: calc(var(--radius) * 0.75);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) * 1.25);
@@ -48,43 +54,51 @@
   --radius-2xl: calc(var(--radius) * 2);
   --radius-3xl: calc(var(--radius) * 2.5);
   --radius-4xl: calc(var(--radius) * 3);
+  --shadow-cockpit: 0 18px 50px rgba(16, 24, 40, 0.12);
+  --shadow-cockpit-panel: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 :root {
-  --canvas: #f2f1ee;
-  --background: #f2f1ee;
-  --foreground: #1c1b18;
+  --canvas: #eef1f5;
+  --background: #eef1f5;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: #1c1b18;
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: #1c1b18;
-  --primary: #1d3f6b;
+  --popover-foreground: #111827;
+  --primary: #123f78;
   --primary-foreground: #ffffff;
-  --secondary: #f8f7f5;
-  --secondary-foreground: #1c1b18;
-  --muted: #f8f7f5;
-  --muted-foreground: #706f6c;
-  --accent: #f2f1ee;
-  --accent-foreground: #1c1b18;
-  --destructive: #dc2626;
-  --border: #e2deda;
-  --input: #e2deda;
-  --ring: #2d6be4;
-  --panel: #eceae6;
-  --chart-1: #1d3f6b;
+  --secondary: #f7f8fa;
+  --secondary-foreground: #111827;
+  --muted: #f7f8fa;
+  --muted-foreground: #667085;
+  --accent: #f7f8fa;
+  --accent-foreground: #111827;
+  --destructive: #b91c1c;
+  --border: #d8dde6;
+  --input: #d8dde6;
+  --ring: #174ea6;
+  --panel: #f8fafc;
+  --cockpit-blue: #174ea6;
+  --cockpit-crit: #b91c1c;
+  --cockpit-maj: #c2410c;
+  --cockpit-minor: #475569;
+  --cockpit-green: #047857;
+  --cockpit-amber: #b45309;
+  --chart-1: #174ea6;
   --chart-2: #c2410c;
-  --chart-3: #706f6c;
-  --chart-4: #dc2626;
-  --chart-5: #166534;
-  --radius: 0.25rem;
-  --sidebar: #18202e;
-  --sidebar-foreground: #c8d0dc;
-  --sidebar-primary: #4a7cf7;
+  --chart-3: #667085;
+  --chart-4: #b91c1c;
+  --chart-5: #047857;
+  --radius: 3px;
+  --sidebar: #07111f;
+  --sidebar-foreground: #d7dde8;
+  --sidebar-primary: #60a5fa;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.09);
+  --sidebar-accent: #122846;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #0e1520;
-  --sidebar-ring: #4a7cf7;
+  --sidebar-border: #111f33;
+  --sidebar-ring: #60a5fa;
 }
 
 @layer base {
@@ -107,5 +121,56 @@
   ::-webkit-scrollbar-thumb {
     background: #c9c5bf;
     border-radius: 3px;
+  }
+}
+
+@layer components {
+  .cockpit-pill {
+    @apply inline-flex items-center gap-1.5 rounded border border-border bg-card px-[7px] py-1 text-[11px] font-extrabold whitespace-nowrap;
+  }
+  .cockpit-pill-crit {
+    @apply border-[#f3b4b4] bg-[#fff5f5] text-[#b91c1c];
+  }
+  .cockpit-pill-maj {
+    @apply border-[#fed7aa] bg-[#fff7ed] text-[#c2410c];
+  }
+  .cockpit-pill-min {
+    @apply border-[#cbd5e1] bg-[#f8fafc] text-[#475569];
+  }
+  .cockpit-pill-ok {
+    @apply border-[#a7f3d0] bg-[#ecfdf5] text-[#047857];
+  }
+  .cockpit-pill-blue {
+    @apply border-[#bfdbfe] bg-[#eff6ff] text-[#174ea6];
+  }
+  .cockpit-pill-dark {
+    @apply border-[#334155] bg-[#111827] text-white;
+  }
+  .cockpit-tab {
+    @apply rounded border border-border bg-card px-[7px] py-[5px] font-mono text-[10px];
+  }
+  .cockpit-tab-on {
+    @apply border-[#111827] bg-[#111827] text-white;
+  }
+  .cockpit-panel {
+    @apply border border-border bg-card shadow-[var(--shadow-cockpit-panel)];
+  }
+  .cockpit-btn {
+    @apply rounded border border-border bg-card px-2.5 py-[9px] text-center text-[13px] font-extrabold text-[#344054];
+  }
+  .cockpit-btn-primary {
+    @apply border-[#123f78] bg-[#123f78] text-white;
+  }
+  .cockpit-btn-warn {
+    @apply border-[#f3b4b4] bg-[#fff5f5] text-[#b91c1c];
+  }
+  .cockpit-label {
+    @apply mb-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[#667085];
+  }
+  .cockpit-tiny {
+    @apply font-mono text-[10px] leading-relaxed text-[#7f8da5];
+  }
+  .cockpit-section-label {
+    @apply my-3 mb-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[#667085];
   }
 }
