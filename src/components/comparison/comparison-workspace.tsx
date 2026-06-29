@@ -8,7 +8,7 @@ import { FindingsSidebar, type ReviewAction } from "./findings-sidebar";
 import { FindingDetailPanel } from "./finding-detail-panel";
 import { InspectionSummaryBar } from "./inspection-summary-bar";
 import { OtherFindingsBanner } from "./other-findings-banner";
-import { ReviewerChecklistPanel } from "@/components/shared/reviewer-checklist-panel";
+import { ComparisonChecklistDrawer } from "./comparison-checklist-drawer";
 import { useInspection, useFindings } from "@/hooks/use-inspections";
 import { EvidenceRegion } from "@/domain/models";
 import { FindingSeverity } from "@/domain/enums";
@@ -250,12 +250,10 @@ export function ComparisonWorkspace({ inspectionId }: ComparisonWorkspaceProps) 
         />
       </div>
 
-      <div className="shrink-0 border-t border-border p-3">
-        <ReviewerChecklistPanel
-          inspectionId={inspectionId}
-          completed={inspection.checklistCompleted}
-        />
-      </div>
+      <ComparisonChecklistDrawer
+        inspectionId={inspectionId}
+        completed={inspection.checklistCompleted}
+      />
 
       {noteDialogFindingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

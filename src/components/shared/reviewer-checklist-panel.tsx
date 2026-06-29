@@ -11,12 +11,14 @@ interface ReviewerChecklistPanelProps {
   inspectionId: string;
   completed: Record<string, boolean>;
   onUpdate?: (completed: Record<string, boolean>) => void;
+  compact?: boolean;
 }
 
 export function ReviewerChecklistPanel({
   inspectionId,
   completed,
   onUpdate,
+  compact = false,
 }: ReviewerChecklistPanelProps) {
   const [local, setLocal] = useState(completed);
   const [saving, setSaving] = useState<string | null>(null);
@@ -36,8 +38,8 @@ export function ReviewerChecklistPanel({
   const doneCount = REVIEWER_CHECKLIST_ITEMS.filter((i) => local[i.id]).length;
 
   return (
-    <Card className="border border-border shadow-none">
-      <CardHeader className="pb-2">
+    <Card className={cn("border border-border shadow-none", compact && "h-full border-0 shadow-none")}>
+      <CardHeader className={cn("pb-2", compact && "px-0 pt-0")}>
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold">
             Reviewer Checklist
@@ -50,7 +52,7 @@ export function ReviewerChecklistPanel({
           Confirm each step before recording a final decision.
         </p>
       </CardHeader>
-      <CardContent className="space-y-1 pt-0">
+      <CardContent className={cn("space-y-1 pt-0", compact && "overflow-y-auto px-0 pb-0")}>
         {REVIEWER_CHECKLIST_ITEMS.map((item) => {
           const checked = !!local[item.id];
           const Icon = checked ? CheckSquare : Square;

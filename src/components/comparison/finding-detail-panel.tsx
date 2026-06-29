@@ -20,6 +20,9 @@ import { confidencePercent } from "@/lib/findings";
 import { getDifferenceNote } from "@/lib/finding-difference";
 import type { ReviewAction } from "@/components/comparison/findings-sidebar";
 
+const PANEL_WIDTH = "min(100%, 480px)";
+const PANEL_BASIS = "480px";
+
 const severityConfig = {
   [FindingSeverity.Critical]: {
     icon: AlertCircle,
@@ -52,6 +55,9 @@ const categoryLabels: Record<FindingCategory, string> = {
   [FindingCategory.MissingElement]: "Missing",
 };
 
+const panelShell =
+  "flex h-full min-h-0 shrink-0 flex-col border-l border-border bg-card shadow-[-4px_0_12px_rgba(0,0,0,0.04)]";
+
 interface FindingDetailPanelProps {
   finding: Finding | null;
   reviewerAction: ReviewAction;
@@ -67,7 +73,10 @@ export function FindingDetailPanel({
 }: FindingDetailPanelProps) {
   if (!finding) {
     return (
-      <div className="flex h-full w-[min(100%,440px)] min-w-[320px] shrink-0 basis-[440px] flex-col items-center justify-center border-l border-border bg-muted/20 px-4 text-center shadow-[-4px_0_12px_rgba(0,0,0,0.04)]">
+      <div
+        className={cn(panelShell, "items-center justify-center bg-muted/20 px-4 text-center")}
+        style={{ width: PANEL_WIDTH, minWidth: "360px", flexBasis: PANEL_BASIS }}
+      >
         <p className="text-sm font-medium text-muted-foreground">
           Select a finding
         </p>
@@ -81,14 +90,18 @@ export function FindingDetailPanel({
   const config = severityConfig[finding.severity];
   const Icon = config.icon;
   const isBarcode = finding.category === FindingCategory.Barcode;
+  const confidence = `${confidencePercent(finding)}%`;
 
   return (
-    <div className="flex h-full w-[min(100%,440px)] min-w-[320px] shrink-0 basis-[440px] flex-col border-l border-border bg-card shadow-[-4px_0_12px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-border px-3 py-2.5">
+    <div
+      className={panelShell}
+      style={{ width: PANEL_WIDTH, minWidth: "360px", flexBasis: PANEL_BASIS }}
+    >
+      <div className="shrink-0 border-b border-border px-3 py-2.5">
         <div className="flex items-start gap-2">
           <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", config.color)} />
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-foreground leading-tight">
+            <h3 className="text-sm font-semibold leading-tight text-foreground">
               {finding.title}
             </h3>
             <div className="mt-1 flex flex-wrap gap-1">
@@ -103,7 +116,7 @@ export function FindingDetailPanel({
         </div>
       </div>
 
-      <div className="flex-1 space-y-2.5 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
         <Card className="border border-border bg-muted/20 shadow-none">
           <CardHeader className="pb-1 pt-2.5 px-2.5">
             <CardTitle className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -131,25 +144,17 @@ export function FindingDetailPanel({
               value={finding.detectionMethod}
               tone="neutral"
             />
-            <EvidenceRow
-              label="Confidence"
-              value={`${confidencePercent(finding)}%`}
-              tone="neutral"
-            />
-            <EvidenceRow
-              label="Recommended action"
-              value={finding.recommendedAction}
-              tone="neutral"
-            />
           </CardContent>
         </Card>
 
-        <DetailRow label="Location" value={finding.location} />
-        <DetailRow label="Page" value={String(finding.pageNumber)} />
+        <div className="mt-2.5 space-y-2">
+          <DetailRow label="Location" value={finding.location} />
+          <DetailRow label="Page" value={String(finding.pageNumber)} />
+        </div>
 
         {isBarcode && (
-          <Card className="border border-amber-200 bg-amber-50/50 shadow-none">
-            <CardHeader className="pb-1 pt-3 px-3">
+          <Card className="mt-2.5 border border-amber-200 bg-amber-50/50 shadow-none">
+            <CardHeader className="px-3 pb-1 pt-3">
               <CardTitle className="flex items-center gap-1.5 text-xs font-semibold">
                 <Barcode className="h-3.5 w-3.5" />
                 Barcode check
@@ -162,7 +167,7 @@ export function FindingDetailPanel({
                   {finding.supplierValue ?? finding.sourceValue ?? "—"}
                 </span>
               </p>
-              <p className="text-[11px] text-muted-foreground italic">
+              <p className="text-[11px] italic text-muted-foreground">
                 Not validated against ISO/IEC 15416 — human verification required.
               </p>
             </CardContent>
@@ -170,7 +175,7 @@ export function FindingDetailPanel({
         )}
 
         {(finding.masterEvidenceSrc || finding.supplierEvidenceSrc) && (
-          <div className="space-y-2">
+          <div className="mt-2.5 space-y-2">
             <p className="text-[11px] font-medium text-muted-foreground">
               Evidence snapshots
             </p>
@@ -184,36 +189,51 @@ export function FindingDetailPanel({
         )}
       </div>
 
-      <div className="space-y-2 border-t border-border p-3">
+      <div className="shrink-0 space-y-2 border-t border-border bg-card p-3">
+        <div className="grid grid-cols-2 gap-2 rounded-md border border-border bg-muted/30 p-2.5">
+          <div>
+            <p className="text-[10px] font-medium text-muted-foreground">Confidence</p>
+            <p className="text-sm font-semibold text-foreground">{confidence}</p>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-medium text-muted-foreground">
+              Recommended action
+            </p>
+            <p className="break-words text-xs font-medium leading-snug text-foreground">
+              {finding.recommendedAction}
+            </p>
+          </div>
+        </div>
+
         <Button
           variant={reviewerAction === "accepted" ? "default" : "outline"}
           size="sm"
-          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
+          className="h-auto min-h-9 w-full justify-start whitespace-normal px-3 py-2 text-left text-sm"
           onClick={() =>
             onAction(reviewerAction === "accepted" ? null : "accepted")
           }
         >
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           Confirm Finding
         </Button>
         <Button
           variant={reviewerAction === "dismissed" ? "default" : "outline"}
           size="sm"
-          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
+          className="h-auto min-h-9 w-full justify-start whitespace-normal px-3 py-2 text-left text-sm"
           onClick={() =>
             onAction(reviewerAction === "dismissed" ? null : "dismissed")
           }
         >
-          <XCircle className="h-3.5 w-3.5 shrink-0" />
+          <XCircle className="h-4 w-4 shrink-0" />
           Dismiss False Positive
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto min-h-8 w-full justify-start whitespace-normal px-3 py-2 text-left text-xs"
+          className="h-auto min-h-9 w-full justify-start whitespace-normal px-3 py-2 text-left text-sm"
           onClick={onAddNote}
         >
-          <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+          <MessageSquare className="h-4 w-4 shrink-0" />
           Add Note
         </Button>
       </div>
@@ -225,7 +245,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
-      <p className="text-xs text-foreground">{value}</p>
+      <p className="break-words text-xs text-foreground">{value}</p>
     </div>
   );
 }

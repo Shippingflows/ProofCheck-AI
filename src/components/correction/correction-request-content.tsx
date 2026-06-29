@@ -189,7 +189,7 @@ export function CorrectionRequestContent({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <CorrectionStatusTracker status={inspection.correctionStatus} />
 
       {/* Inspection details */}
@@ -280,23 +280,23 @@ export function CorrectionRequestContent({
         </div>
 
         {/* Email draft */}
-        <div className="col-span-2">
-          <Card className="border border-border shadow-none">
-            <CardHeader className="pb-2">
+        <div className="col-span-2 flex min-h-0 flex-col">
+          <Card className="flex min-h-0 flex-1 flex-col border border-border shadow-none">
+            <CardHeader className="shrink-0 pb-2">
               <CardTitle className="text-sm">Correction Request Draft</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Review the generated supplier correction request before sending.
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
+            <CardContent className="flex min-h-0 flex-1 flex-col space-y-4">
+              <div className="shrink-0 space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">To</label>
                 <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
                   {DEMO_SUPPLIER_EMAIL}
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="shrink-0 space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Subject</label>
                 <input
                   type="text"
@@ -306,13 +306,12 @@ export function CorrectionRequestContent({
                 />
               </div>
 
-              {/* Email preview card */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+              <div className="flex min-h-0 flex-1 flex-col space-y-1">
+                <label className="shrink-0 text-xs font-medium text-muted-foreground">
                   Email preview
                 </label>
-                <div className="rounded-lg border border-border bg-white shadow-sm">
-                  <div className="border-b border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+                <div className="flex min-h-[min(52vh,520px)] flex-1 flex-col overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+                  <div className="shrink-0 border-b border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
                     <p>
                       <span className="font-medium text-foreground">To:</span>{" "}
                       {DEMO_SUPPLIER_EMAIL}
@@ -325,14 +324,13 @@ export function CorrectionRequestContent({
                   <textarea
                     value={emailBody}
                     onChange={(e) => setEmailBody(e.target.value)}
-                    className="min-h-[420px] w-full resize-y border-0 bg-transparent px-4 py-3 font-sans text-sm leading-relaxed text-foreground focus-visible:outline-none"
-                    rows={24}
+                    className="min-h-0 flex-1 resize-none overflow-y-scroll px-4 py-3 font-sans text-sm leading-relaxed text-foreground focus-visible:outline-none [scrollbar-gutter:stable]"
+                    rows={20}
                   />
                 </div>
               </div>
 
-              {/* Included findings summary */}
-              <div className="space-y-1">
+              <div className="shrink-0 space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">
                   Included findings ({selectedFindings.length})
                 </label>
@@ -356,9 +354,8 @@ export function CorrectionRequestContent({
                 </div>
               </div>
 
-              {/* Supplier response due date */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <div className="shrink-0 space-y-1">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
                   Supplier response due date
                 </label>
@@ -370,62 +367,68 @@ export function CorrectionRequestContent({
                 />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground">
-                  Pilot workspace — email is not sent automatically.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopy}
-                    disabled={sent}
-                  >
-                    {copied ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                    {copied ? "Copied" : "Copy Email"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSaveDraft}
-                    disabled={sent}
-                  >
-                    {draftSaved ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5" />
-                    )}
-                    {draftSaved ? "Draft Saved" : "Save Draft"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleMarkSent}
-                    disabled={sent}
-                    className={cn(sent && "bg-emerald-600 hover:bg-emerald-600")}
-                  >
-                    {sent ? (
-                      <CheckCircle className="h-3.5 w-3.5" />
-                    ) : (
-                      <Send className="h-3.5 w-3.5" />
-                    )}
-                    {sent ? "Marked as Sent" : "Mark as Sent"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push("/report")}
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    Preview Report
-                  </Button>
-                </div>
-              </div>
+              <p className="shrink-0 text-xs text-muted-foreground">
+                Pilot workspace — email is not sent automatically.
+              </p>
             </CardContent>
           </Card>
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-60 right-0 z-30 border-t border-border bg-card/95 px-6 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Actions apply to the draft above — nothing is sent automatically.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopy}
+              disabled={sent}
+            >
+              {copied ? (
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copied ? "Copied" : "Copy Email"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveDraft}
+              disabled={sent}
+            >
+              {draftSaved ? (
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )}
+              {draftSaved ? "Draft Saved" : "Save Draft"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleMarkSent}
+              disabled={sent}
+              className={cn(sent && "bg-emerald-600 hover:bg-emerald-600")}
+            >
+              {sent ? (
+                <CheckCircle className="h-3.5 w-3.5" />
+              ) : (
+                <Send className="h-3.5 w-3.5" />
+              )}
+              {sent ? "Marked as Sent" : "Mark as Sent"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/report")}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Preview Report
+            </Button>
+          </div>
         </div>
       </div>
     </div>
